@@ -40,7 +40,7 @@ public abstract class DomainServiceImpl<DomainClass, DomainId, Model, IdType,
 	/**
 	 * Entity manager.
 	 */
-	protected EntityManager entityManager;
+	final protected EntityManager entityManager;
 	/**
 	 * DAO class.
 	 */
@@ -77,7 +77,7 @@ public abstract class DomainServiceImpl<DomainClass, DomainId, Model, IdType,
 				.getGenericSuperclass()).getActualTypeArguments()[3];
 		mapper = new MainMapper();
 	}
-
+	
 	/**
 	 * Get all domain objects.
 	 * 

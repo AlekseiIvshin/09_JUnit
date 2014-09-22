@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import common.mapper.MainMapper;
 import common.mapper.Mapper;
 import common.service.DomainServiceImpl;
+import customer.dao.CustomerDAOImpl;
 import car.dao.mark.Mark;
 import car.dao.mark.MarkDAO;
 import car.dao.mark.MarkDAOImpl;
@@ -49,9 +50,8 @@ public class CarServiceImpl
 	 * Default constructor.
 	 */
 	public CarServiceImpl() {
-		EntityManagerFactory emf = Persistence
-				.createEntityManagerFactory("07_JPA");
-		entityManager = emf.createEntityManager();
+		super();
+        dao = new ModificationDAOImpl(entityManager);
 	}
 
 	/**
