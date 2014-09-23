@@ -17,11 +17,12 @@ public class MyMapper implements Mapper {
 
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
-	public Object map(Object fromObj) throws MapperException {
+	public Object map(Object fromObj, Object targetObject) throws MapperException {
 		if(!fromObj.getClass().equals(classMap.getFrom())){
 			throw new MapperException("Classes are not equals: " +fromObj.getClass()+" != "+classMap.getFrom());
 		}
-		return null;
+		
+		return classMap.map(fromObj, targetObject);
 	}
 
 	@Override
@@ -118,19 +119,19 @@ public class MyMapper implements Mapper {
 		return false;
 	}
 
-	private void setData(Field toField, Object targetObject, Object value,
-			boolean fromFieldClassIsMapped) throws MapperException {
-
-		if (fromFieldClassIsMapped) {
-			Object resultValue = map(value);
-
-			if (resultValue != null) {
-				DataSetter.setData(toField, targetObject, resultValue);
-			}
-		} else {
-			DataSetter.setData(toField, targetObject, value);
-		}
-	}
+//	private void setData(Field toField, Object targetObject, Object value,
+//			boolean fromFieldClassIsMapped) throws MapperException {
+//
+//		if (fromFieldClassIsMapped) {
+//			Object resultValue = map(value);
+//
+//			if (resultValue != null) {
+//				DataSetter.setData(toField, targetObject, resultValue);
+//			}
+//		} else {
+//			DataSetter.setData(toField, targetObject, value);
+//		}
+//	}
 
 	private static Field getTargetField(Class<?> targetClass,
 			String targetFieldName) throws MapperException {
@@ -143,5 +144,7 @@ public class MyMapper implements Mapper {
 		throw new MapperException("Field not found: " + targetClass.getName()
 				+ "." + targetFieldName);
 	}
+
+
 
 }

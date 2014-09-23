@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import com.sun.org.apache.xpath.internal.operations.Mod;
 
 import annotation.FieldName;
+import mapper.DataGetter;
 import mapper.MapperException;
 
 public class MapField implements MapUnit<Field> {
@@ -18,8 +19,6 @@ public class MapField implements MapUnit<Field> {
 	Field targetField;
 	Method getter;
 	Method setter;
-	boolean useGetter;
-	boolean useSetter;
 
 	@Override
 	public void setFrom(Field from) {
@@ -68,11 +67,23 @@ public class MapField implements MapUnit<Field> {
 		setter = getSetterMethod(targetField.getName());
 		if (setter == null) {
 			if (!Modifier.isPublic(targetField.getModifiers())) {
-				throw new MapperException("Field " + targetClass.getName() + "."
-						+ targetField.getName() + " value is not avaible for set");
+				throw new MapperException("Field " + targetClass.getName()
+						+ "." + targetField.getName()
+						+ " value is not avaible for set");
 			}
 		}
 
+	}
+
+	@Override
+	public Object map(Object fromObject, Object targetObject)
+			throws MapperException {
+		if (targetField == null || fromField == null) {
+			throw new MapperException("From and target fields are null");
+		}
+		Object value = getValue(fromObject);
+
+		return setValue(targetObject, value);
 	}
 
 	public void setFromClass(Class<?> fromClass) {
@@ -103,6 +114,41 @@ public class MapField implements MapUnit<Field> {
 			}
 		}
 		return null;
+	}
+
+	public Object getValue(Object fromObject) throws MapperException {
+		if (getter == null) {
+			try {
+				return fromField.get(fromObject);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new MapperException(e.getMessage());
+			}
+		}
+		try {
+			return getter.invoke(fromObject);
+		} catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			throw new MapperException(e.getCause());
+		}
+	}
+
+	public Object setValue(Object targetObject, Object value)
+			throws MapperException {
+		if (setter == null) {
+			try {
+				targetField.set(targetObject, value);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new MapperException(e.getCause());
+			}
+		} else {
+			try {
+				setter.invoke(targetObject, value);
+			} catch (IllegalArgumentException | IllegalAccessException
+					| InvocationTargetException e) {
+				throw new MapperException(e.getCause());
+			}
+		}
+		return targetObject;
 	}
 
 }

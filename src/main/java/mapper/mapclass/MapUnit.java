@@ -11,4 +11,8 @@ public interface MapUnit<T> {
 	
 	
 	void getMap() throws MapperException;
+	
+	Object map(Object fromObject, Object targetObject) throws MapperException;
+	public Object getValue(Object fromObject) throws MapperException;
+	public Object setValue(Object targetObject, Object value) throws MapperException;
 }

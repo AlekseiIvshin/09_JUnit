@@ -11,6 +11,7 @@ import org.junit.runners.JUnit4;
 
 import classexamples.good.FA;
 import classexamples.good.FromClass;
+import classexamples.good.ToClass;
 
 @RunWith(JUnit4.class)
 public class MyMapperTest {
@@ -33,7 +34,8 @@ public class MyMapperTest {
 	@Test
 	public void testMap() throws MapperException {
 		Mapper mapper = new MyMapper();
-		assertNotNull("Result is null", mapper.map(fromObject));
+		mapper.prepareMap(FromClass.class);
+		assertNotNull("Result is null", mapper.map(fromObject, new ToClass()));
 	}
 	
 	@Test
@@ -48,7 +50,7 @@ public class MyMapperTest {
 		Mapper mapper = new MyMapper();
 		exception.expect(MapperException.class);
 		exception.expectMessage("Can't find target 'ClassTarget' annotation");
-		mapper.map(fromObjectBad);
+		mapper.map(fromObjectBad, new classexamples.bad.ToClass());
 	}
 	
 	@Test

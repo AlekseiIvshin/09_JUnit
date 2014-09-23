@@ -8,7 +8,7 @@ public interface Mapper {
 	 * @return 
 	 * @throws MapperException 
 	 */
-	public Object map(Object fromClass) throws MapperException;
+	public Object map(Object fromObject, Object targetObject) throws MapperException;
 	
 	public void prepareMap(Class<?> fromObject) throws MapperException;
 }

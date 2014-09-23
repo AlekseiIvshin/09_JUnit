@@ -8,6 +8,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.org.apache.regexp.internal.recompile;
+
 import annotation.ClassTarget;
 import annotation.FieldName;
 import mapper.DataGetter;
@@ -20,21 +22,20 @@ public class MapClass implements MapUnit<Class<?>> {
 	Class<?> fromClass;
 	Class<?> targetClass;
 	Set<MapUnit> classFields;
-	
-	public MapClass(){
+
+	public MapClass() {
 		classFields = new HashSet<MapUnit>();
 	}
-	
-	public void addToMap(MapUnit mapUnit){
-		if(!classFields.contains(mapUnit)){
+
+	public void addToMap(MapUnit mapUnit) {
+		if (!classFields.contains(mapUnit)) {
 			classFields.add(mapUnit);
 		}
 	}
-	
-	public void clear(){
+
+	public void clear() {
 		classFields.clear();
 	}
-
 
 	@Override
 	public void setFrom(Class<?> from) {
@@ -55,12 +56,13 @@ public class MapClass implements MapUnit<Class<?>> {
 	public Class<?> getTarget() {
 		return targetClass;
 	}
-	
+
 	private static String getTargetFieldName(Field fromField) {
 		FieldName fieldName = (FieldName) fromField
 				.getAnnotation(FieldName.class);
 		return fieldName != null ? fieldName.value() : fromField.getName();
 	}
+
 	private static boolean checkFieldsHaveThisClass(Class<?> thisClass) {
 		Field[] toClassFields = thisClass.getDeclaredFields();
 		for (Field tf : toClassFields) {
@@ -70,8 +72,9 @@ public class MapClass implements MapUnit<Class<?>> {
 		}
 		return false;
 	}
-	
-	private static Class<?> getTargetClass(Class<?> fromClass) throws ClassNotFoundException {
+
+	private static Class<?> getTargetClass(Class<?> fromClass)
+			throws ClassNotFoundException {
 		Annotation[] annotations = fromClass.getAnnotations();
 		for (Annotation a : annotations) {
 			if (a.annotationType().equals(ClassTarget.class)) {
@@ -81,7 +84,7 @@ public class MapClass implements MapUnit<Class<?>> {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Check class has annotation for mapping
 	 * 
@@ -109,7 +112,6 @@ public class MapClass implements MapUnit<Class<?>> {
 		FieldName fieldName = (FieldName) field.getAnnotation(FieldName.class);
 		return fieldName != null;
 	}
-	
 
 	private static Field getTargetField(Class<?> targetClass,
 			String targetFieldName) throws MapperException {
@@ -119,15 +121,16 @@ public class MapClass implements MapUnit<Class<?>> {
 				return tf;
 			}
 		}
-		throw new MapperException("Field not found: "+targetClass.getName()+"."+targetFieldName);
+		throw new MapperException("Field not found: " + targetClass.getName()
+				+ "." + targetFieldName);
 	}
 
 	@Override
 	public void getMap() throws MapperException {
-		if(targetClass == null || fromClass == null){
+		if (targetClass == null || fromClass == null) {
 			throw new MapperException("From and target field are null");
 		}
-		
+
 		if (checkFieldsHaveThisClass(fromClass)) {
 			throw new MapperException("Class " + fromClass.getName()
 					+ " contains itself in fields");
@@ -146,18 +149,17 @@ public class MapClass implements MapUnit<Class<?>> {
 			Field toField = getTargetField(targetClass, targetFieldName);
 
 			if (toField == null) {
-				throw new MapperException("Field not found: " + targetClass.getName() + "."
-						+ targetFieldName);
+				throw new MapperException("Field not found: "
+						+ targetClass.getName() + "." + targetFieldName);
 			}
 
 			boolean fieldClassIsMapped = isMapped(fromField.getType());
-			
+
 			if (fieldClassIsMapped) {
 				logger.info("Field is mapped {}.{} -> {}.{}",
 						fromClass.getName(), fromField.getName(),
 						targetClass.getName(), toField.getName());
-				
-				
+
 				MapClass mapCLass = new MapClass();
 				mapCLass.setFrom(fromField.getType());
 				mapCLass.setTarget(toField.getType());
@@ -176,5 +178,57 @@ public class MapClass implements MapUnit<Class<?>> {
 
 		logger.info("Mapping done: class {}", fromClass.getName());
 	}
+
+	@Override
+	public Object map(Object fromObject, Object targetObject)
+			throws MapperException {
+		if (targetObject == null) {
+			try {
+				targetObject = targetClass.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new MapperException(e.getCause());
+			}
+		}
+
+		if (!targetObject.getClass().equals(targetClass)
+				|| !fromObject.getClass().equals(fromClass)) {
+			throw new MapperException("Wrong parameter classes: FROM ["
+					+ fromClass.getName() + " & "
+					+ fromObject.getClass().getName() + "]" + " TARGET ["
+					+ targetClass.getName() + " & "
+					+ targetObject.getClass().getName() + "]");
+		}
+
+		for (MapUnit f : classFields) {
+//			Object fieldValue = getValue(fromObject, f);
+//			System.err.println(fieldValue.getClass().getName()+" ? "+f.getFrom());
+			targetObject = f.map(fromObject, targetObject);
+			//targetObject = setValue(targetObject, f, res);
+		}
+
+		return targetObject;
+	}
+
+	public Object getValue(Object fromObject, MapUnit field) throws MapperException {
+		return field.getValue(fromObject);
+	}
+
+	public Object setValue(Object targetObject,MapUnit field, Object value)
+			throws MapperException {
+		return field.setValue(targetObject, value);
+	}
+
+	@Override
+	public Object getValue(Object fromObject) throws MapperException {
+		return fromObject;
+	}
+
+	@Override
+	public Object setValue(Object targetObject, Object value)
+			throws MapperException {
+		return targetObject;
+	}
+
 	
+
 }
