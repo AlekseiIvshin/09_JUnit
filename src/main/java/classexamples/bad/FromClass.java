@@ -1,9 +1,8 @@
-package classexamples;
+package classexamples.bad;
 
 import annotation.ClassTarget;
 import annotation.FieldName;
 
-@ClassTarget("main.java.classexamples.ToClass")
 public class FromClass {
 
 	@FieldName("userId")
@@ -18,8 +17,6 @@ public class FromClass {
 	@FieldName("ta")
 	public FA fa;
 	
-	@FieldName("anyField")
-	private String anyField;
 	
 	public String getId(){
 		return id;

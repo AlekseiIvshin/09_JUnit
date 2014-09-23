@@ -1,9 +1,9 @@
-package classexamples;
+package classexamples.good;
 
 import annotation.ClassTarget;
 import annotation.FieldName;
 
-@ClassTarget("main.java.classexamples.TA")
+@ClassTarget("classexamples.good.TA")
 public class FA {
 
 	@FieldName("id")

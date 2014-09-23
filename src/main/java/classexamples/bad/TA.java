@@ -1,4 +1,4 @@
-package classexamples;
+package classexamples.bad;
 
 public class TA {
 
