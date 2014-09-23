@@ -18,75 +18,24 @@ public class MyMapper implements Mapper {
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
 	public Object map(Object fromObj) throws MapperException {
-		Class<?> fromClass = fromObj.getClass();
-
-		logger.info("Starting mapping: class {}", fromClass);
-
-		if (checkFieldsHaveThisClass(fromClass)) {
-			throw new MapperException("Class " + fromClass.getName()
-					+ " contains itself in fields");
+		if(!fromObj.getClass().equals(classMap.getFrom())){
+			throw new MapperException("Classes are not equals: " +fromObj.getClass()+" != "+classMap.getFrom());
 		}
+		return null;
+	}
+
+	@Override
+	public void prepareMap(Class<?> fromClass) throws MapperException {
+		classMap = new MapClass();
 
 		Class<?> toClass = getTargetClass(fromClass);
 		if (toClass == null) {
 			throw new MapperException(
 					"Can't find target 'ClassTarget' annotation");
 		}
-		// Get result class instance
-		Object result;
-		try {
-			result = toClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e1) {
-			// logger.error("Error on create new instance of {}: {}",
-			// toClass.getName(), e1.toString());
-			throw new MapperException(e1.getCause());
-		}
-
-		Field[] fields = fromClass.getDeclaredFields();
-
-		for (Field fromField : fields) {
-
-			if (!isMapped(fromField)) {
-				continue;
-			}
-
-			String targetFieldName = getTargetFieldName(fromField);
-
-			Field toField = getTargetField(toClass, targetFieldName);
-
-			if (toField == null) {
-				throw new MapperException("Field not found: " + toClass + "."
-						+ targetFieldName);
-			}
-
-			boolean fieldClassIsMapped = isMapped(fromField.getType());
-
-			if (fieldClassIsMapped) {
-				logger.info("Field is mapped {}.{} -> {}.{}",
-						fromClass.getName(), fromField.getName(),
-						toClass.getName(), toField.getName());
-			} else {
-				if (!toField.getType().equals(fromField.getType())) {
-					throw new MapperException("Types of fields not equals:"
-							+ fromField.getName() + "[" + fromField.getType()
-							+ "] " + "and " + toField.getName() + "["
-							+ toField.getType() + "]");
-				}
-			}
-
-			Object valueForTargetField = DataGetter.getData(fromField, fromObj);
-
-			if (valueForTargetField == null) {
-				logger.warn("Value of {} equals NULL", fromField.getName());
-				continue;
-			}
-
-			setData(toField, result, valueForTargetField, fieldClassIsMapped);
-
-		}
-
-		logger.info("Mapping done: class {}", fromClass.getName());
-		return result;
+		classMap.setFrom(fromClass);
+		classMap.setTarget(toClass);
+		classMap.getMap();
 	}
 
 	/**
@@ -193,20 +142,6 @@ public class MyMapper implements Mapper {
 		}
 		throw new MapperException("Field not found: " + targetClass.getName()
 				+ "." + targetFieldName);
-	}
-
-	@Override
-	public void prepareMap(Class<?> fromClass) throws MapperException {
-		classMap = new MapClass();
-
-		Class<?> toClass = getTargetClass(fromClass);
-		if (toClass == null) {
-			throw new MapperException(
-					"Can't find target 'ClassTarget' annotation");
-		}
-		classMap.setFrom(fromClass);
-		classMap.setTarget(toClass);
-		classMap.getMap();
 	}
 
 }

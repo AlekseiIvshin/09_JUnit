@@ -159,10 +159,10 @@ public class MapClass implements MapUnit<Class<?>> {
 				
 				
 				MapClass mapCLass = new MapClass();
-				mapCLass.setFrom(fromClass);
-				mapCLass.setTarget(targetClass);
+				mapCLass.setFrom(fromField.getType());
+				mapCLass.setTarget(toField.getType());
 				mapCLass.getMap();
-				addToMap(new MapField());
+				addToMap(mapCLass);
 			} else {
 				MapField mapField = new MapField();
 				mapField.setFrom(fromField);

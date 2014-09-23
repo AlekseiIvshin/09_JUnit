@@ -67,9 +67,9 @@ public class MapField implements MapUnit<Field> {
 		}
 		setter = getSetterMethod(targetField.getName());
 		if (setter == null) {
-			if (!Modifier.isPublic(fromField.getModifiers())) {
-				throw new MapperException("Field " + fromClass.getName() + "."
-						+ fromField.getName() + " value is not avaible for set");
+			if (!Modifier.isPublic(targetField.getModifiers())) {
+				throw new MapperException("Field " + targetClass.getName() + "."
+						+ targetField.getName() + " value is not avaible for set");
 			}
 		}
 
