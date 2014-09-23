@@ -28,7 +28,6 @@ public class DataGetter   {
 	 */
 	public static Object getData(Field field,Object obj) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, MapperException{
 		logger.info("Get data {}.{}",obj.getClass(),field.getName());
-				
 		try {
 			return getDataFromField(field, obj);
 		} catch (IllegalArgumentException | IllegalAccessException e) {

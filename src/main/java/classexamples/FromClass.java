@@ -18,6 +18,9 @@ public class FromClass {
 	@FieldName("ta")
 	public FA fa;
 	
+	@FieldName("anyField")
+	private String anyField;
+	
 	public String getId(){
 		return id;
 	}
