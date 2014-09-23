@@ -8,9 +8,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.junit.Before;
 import org.junit.Test;
 
-import classexamples.FA;
-import classexamples.FromClass;
-import classexamples.ToClass;
+import classexamples.good.FA;
+import classexamples.good.FromClass;
+import classexamples.good.ToClass;
 
 public class DataGetterTest {
 

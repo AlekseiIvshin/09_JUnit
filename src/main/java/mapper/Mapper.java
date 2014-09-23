@@ -9,4 +9,6 @@ public interface Mapper {
 	 * @throws MapperException 
 	 */
 	public Object map(Object fromClass) throws MapperException;
+	
+	public void prepareMap(Class<?> fromObject) throws MapperException;
 }

@@ -1,10 +1,10 @@
-package classexamples;
+package classexamples.good;
 
 public class ToClass {
 
 	public String userId;
 	
-	private String userName;
+	public String userName;
 	public String userLastName;
 	
 	public String getUserName(){
