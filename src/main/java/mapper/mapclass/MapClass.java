@@ -18,7 +18,7 @@ import mapper.MyMapper;
 public class MapClass implements MapUnit {
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
-	Class<?> fromClass;
+	Class<?> sourceClass;
 	Class<?> targetClass;
 	Set<MapField> classFields;
 	Method getter;
@@ -39,17 +39,16 @@ public class MapClass implements MapUnit {
 	}
 
 	@Override
-	public void setFromClass(Class<?> from) {
-		this.fromClass = from;
+	public void setSourceClass(Class<?> source) {
+		this.sourceClass = source;
 	}
 
 	@Override
-	public Class<?> getFromClass() {
-		return fromClass;
+	public Class<?> getSourceClass() {
+		return sourceClass;
 	}
 
-	@Override
-	public void setTargetClass(Class<?> target) {
+	private void setTargetClass(Class<?> target) {
 		this.targetClass = target;
 	}
 
@@ -74,13 +73,17 @@ public class MapClass implements MapUnit {
 		return false;
 	}
 
-	private static Class<?> getTargetClass(Class<?> fromClass)
-			throws ClassNotFoundException {
-		Annotation[] annotations = fromClass.getAnnotations();
+	private static Class<?> getTargetClass(Class<?> sourceClass) throws MapperException
+			 {
+		Annotation[] annotations = sourceClass.getAnnotations();
 		for (Annotation a : annotations) {
 			if (a.annotationType().equals(ClassTarget.class)) {
 				ClassTarget ct = (ClassTarget) a;
-				return Class.forName(ct.value());
+				try {
+					return Class.forName(ct.value());
+				} catch (ClassNotFoundException e) {
+					throw new MapperException(e.getMessage());
+				}
 			}
 		}
 		return null;
@@ -127,17 +130,19 @@ public class MapClass implements MapUnit {
 	}
 
 	@Override
-	public void getMap() throws MapperException {
-		if (targetClass == null || fromClass == null) {
+	public void createMap() throws MapperException {
+		
+		targetClass = getTargetClass(sourceClass);
+		if (targetClass == null || sourceClass == null) {
 			throw new MapperException("From and target field are null");
 		}
 
-		if (checkFieldsHaveThisClass(fromClass)) {
-			throw new MapperException("Class " + fromClass.getName()
+		if (checkFieldsHaveThisClass(sourceClass)) {
+			throw new MapperException("Class " + sourceClass.getName()
 					+ " contains itself in fields");
 		}
 
-		Field[] fields = fromClass.getDeclaredFields();
+		Field[] fields = sourceClass.getDeclaredFields();
 
 		for (Field fromField : fields) {
 
@@ -159,7 +164,7 @@ public class MapClass implements MapUnit {
 			Method getter = getGetterMethod(fromField.getName());
 			if (getter == null) {
 				if (!Modifier.isPublic(fromField.getModifiers())) {
-					throw new MapperException("Field " + fromClass.getName()
+					throw new MapperException("Field " + sourceClass.getName()
 							+ "." + fromField.getName()
 							+ " value is not avaible for get");
 				}
@@ -176,30 +181,30 @@ public class MapClass implements MapUnit {
 			MapField unit = null;
 			// if (fieldClassIsMapped) {
 			// logger.info("Field is mapped {}.{} -> {}.{}",
-			// fromClass.getName(), fromField.getName(),
+			// sourceClass.getName(), fromField.getName(),
 			// targetClass.getName(), toField.getName());
 			//
 			// unit = new MapClass();
-			// unit.setFromClass(fromField.getType());
+			// unit.setSourceClass(fromField.getType());
 			// unit.setTargetClass(toField.getType());
 			// } else {
 			unit = new MapField();
-			unit.setFromClass(fromClass);
+			unit.setSourceClass(sourceClass);
 			unit.setTargetClass(targetClass);
 			// }
 			// unit.setSetter(setter);
 			// unit.setGetter(getter);
-			unit.setFromField(fromField);
+			unit.setSourceField(fromField);
 			unit.setTargetField(toField);
-			unit.getMap();
+			unit.createMap();
 			addToMap(unit);
 		}
 
-		logger.info("Mapping done: class {}", fromClass.getName());
+		logger.info("Mapping done: class {}", sourceClass.getName());
 	}
 
 	private Method getGetterMethod(String fieldName) {
-		Method[] methods = fromClass.getDeclaredMethods();
+		Method[] methods = sourceClass.getDeclaredMethods();
 		String getterName = "get" + fieldName;
 		for (Method m : methods) {
 			if (m.getName().equalsIgnoreCase(getterName)) {
@@ -224,5 +229,16 @@ public class MapClass implements MapUnit {
 	public Set<MapField> getFields() {
 		return classFields;
 	}
+	
+	public static boolean isEmpty(MapClass map){
+		return map == null || map.getSourceClass() == null;
+	}
 
+	public Object getNewInstanceOfTarget() throws MapperException{
+		try {
+			return targetClass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new MapperException(e.getMessage());
+		}
+	}
 }

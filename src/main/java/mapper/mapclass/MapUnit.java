@@ -6,13 +6,13 @@ import mapper.MapperException;
 
 public interface MapUnit {
 
-	void setFromClass(Class<?> from);
-	Class<?> getFromClass();
-	void setTargetClass(Class<?> target);
+	void setSourceClass(Class<?> from);
+	Class<?> getSourceClass();
+	//void setTargetClass(Class<?> target);
 	Class<?> getTargetClass();
 	
 	
-	void getMap() throws MapperException;
+	void createMap() throws MapperException;
 	
 	
 	Set<MapField> getFields();

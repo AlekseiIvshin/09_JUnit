@@ -1,68 +1,54 @@
 package mapper;
 
-import java.lang.annotation.Annotation;
-import mapper.datagetter.DoMapClass;
+import mapper.datagetter.DoMap;
 import mapper.mapclass.MapClass;
+import mapper.mapclass.MapProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotation.ClassTarget;
-
 public class MyMapper implements Mapper {
 
-	private MapClass classMap;
+	private MapProvider currentProvider;
+	private DoMap transferProvider;
 
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
 	public Object map(Object fromObj, Object targetObject)
 			throws MapperException {
-		if (classMap == null) {
-			throw new MapperException("Map of class is null");
+		if (MapClass.isEmpty(currentProvider.getMap())) {
+			throw new MapperException("Map of class is missing");
 		}
-		if (!fromObj.getClass().equals(classMap.getFromClass())) {
-			throw new MapperException("Classes are not equals: "
-					+ fromObj.getClass() + " != " + classMap.getFromClass());
-		}
-		DoMapClass doMapClass = new DoMapClass();
-		return doMapClass.map(fromObj, targetObject, classMap);
+		return transferProvider.map(fromObj, targetObject,
+				currentProvider.getMap());
 	}
 
 	@Override
 	public void prepareMap(Class<?> fromClass) throws MapperException {
-		classMap = new MapClass();
-
-		Class<?> toClass = getTargetClass(fromClass);
-		if (toClass == null) {
-			throw new MapperException(
-					"Can't find target 'ClassTarget' annotation");
+		if (currentProvider == null) {
+			throw new MapperException("Provider is null");
 		}
-		classMap.setFromClass(fromClass);
-		classMap.setTargetClass(toClass);
-		classMap.getMap();
+		currentProvider.createMap(fromClass);
 	}
 
-	/**
-	 * Get target class from annotation
-	 * 
-	 * @param fromClass
-	 * @return target class
-	 */
-	private static Class<?> getTargetClass(Class<?> fromClass) {
-		Annotation[] annotations = fromClass.getAnnotations();
-		for (Annotation a : annotations) {
-			if (a.annotationType().equals(ClassTarget.class)) {
-				ClassTarget ct = (ClassTarget) a;
-				try {
-					return Class.forName(ct.value());
-				} catch (ClassNotFoundException e) {
-					logger.error("Target class {} for {} not founded",
-							ct.value(), fromClass);
-					return null;
-				}
-			}
-		}
-		return null;
+	@Override
+	public <T extends MapProvider> void setMapProvider(T provider) {
+		currentProvider = provider;
+	}
+
+	@Override
+	public MapProvider getMapProvider() {
+		return currentProvider;
+	}
+
+	@Override
+	public <T extends DoMap> void setTransferProvider(T provider) {
+		transferProvider = provider;
+	}
+
+	@Override
+	public DoMap getTransferProvider() {
+		return transferProvider;
 	}
 
 }

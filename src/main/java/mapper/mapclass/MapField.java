@@ -9,19 +9,19 @@ import mapper.MapperException;
 
 public class MapField implements MapUnit {
 
-	Class<?> fromClass;
+	Class<?> sourceClass;
 	Class<?> targetClass;
-	Field fromField;
+	Field sourceField;
 	Field targetField;
 	Method getter;
 	Method setter;
 
-	public void setFromField(Field from) {
-		this.fromField = from;
+	public void setSourceField(Field source) {
+		this.sourceField = source;
 	}
 
-	public Field getFromField() {
-		return fromField;
+	public Field getSourceField() {
+		return sourceField;
 	}
 
 	public void setTargetField(Field target) {
@@ -32,27 +32,27 @@ public class MapField implements MapUnit {
 		return targetField;
 	}
 
-	public void getMap() throws MapperException {
-		if (targetField == null || fromField == null) {
-			throw new MapperException("From and target field are null");
+	public void createMap() throws MapperException {
+		if (targetField == null || sourceField == null) {
+			throw new MapperException("Source and target field are null");
 		}
-		if (!targetField.getType().equals(fromField.getType())) {
+		if (!targetField.getType().equals(sourceField.getType())) {
 			throw new MapperException("Types of fields not equals:"
-					+ fromField.getName() + "[" + fromField.getType() + "] "
+					+ sourceField.getName() + "[" + sourceField.getType() + "] "
 					+ "and " + targetField.getName() + "["
 					+ targetField.getType() + "]");
 		}
 
 		if (Modifier.isFinal(targetField.getModifiers())) {
-			throw new MapperException("Field " + fromClass.getName() + "."
-					+ fromField.getName() + " is final");
+			throw new MapperException("Field " + sourceClass.getName() + "."
+					+ sourceField.getName() + " is final");
 		}
 
-		getter = getGetterMethod(fromField.getName());
+		getter = getGetterMethod(sourceField.getName());
 		if (getter == null) {
-			if (!Modifier.isPublic(fromField.getModifiers())) {
-				throw new MapperException("Field " + fromClass.getName() + "."
-						+ fromField.getName() + " value is not avaible for get");
+			if (!Modifier.isPublic(sourceField.getModifiers())) {
+				throw new MapperException("Field " + sourceClass.getName() + "."
+						+ sourceField.getName() + " value is not avaible for get");
 			}
 		}
 		setter = getSetterMethod(targetField.getName());
@@ -66,8 +66,8 @@ public class MapField implements MapUnit {
 
 	}
 
-	public void setFromClass(Class<?> fromClass) {
-		this.fromClass = fromClass;
+	public void setSourceClass(Class<?> sourceClass) {
+		this.sourceClass = sourceClass;
 	}
 
 	public void setTargetClass(Class<?> targetClass) {
@@ -75,7 +75,7 @@ public class MapField implements MapUnit {
 	}
 
 	private Method getGetterMethod(String fieldName) {
-		Method[] methods = fromClass.getDeclaredMethods();
+		Method[] methods = sourceClass.getDeclaredMethods();
 		String getterName = "get" + fieldName;
 		for (Method m : methods) {
 			if (m.getName().equalsIgnoreCase(getterName)) {
@@ -96,8 +96,8 @@ public class MapField implements MapUnit {
 		return null;
 	}
 
-	public Class<?> getFromClass() {
-		return fromClass;
+	public Class<?> getSourceClass() {
+		return sourceClass;
 	}
 
 	public Class<?> getTargetClass() {
