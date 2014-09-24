@@ -47,6 +47,7 @@ public class MapClass implements MapUnit {
 	public Class<?> getFromClass() {
 		return fromClass;
 	}
+
 	@Override
 	public void setTargetClass(Class<?> target) {
 		this.targetClass = target;
@@ -153,13 +154,14 @@ public class MapClass implements MapUnit {
 						+ targetClass.getName() + "." + targetFieldName);
 			}
 
-			boolean fieldClassIsMapped = isMapped(fromField.getType());
+			// boolean fieldClassIsMapped = isMapped(fromField.getType());
 
 			Method getter = getGetterMethod(fromField.getName());
 			if (getter == null) {
 				if (!Modifier.isPublic(fromField.getModifiers())) {
-					throw new MapperException("Field " + fromClass.getName() + "."
-							+ fromField.getName() + " value is not avaible for get");
+					throw new MapperException("Field " + fromClass.getName()
+							+ "." + fromField.getName()
+							+ " value is not avaible for get");
 				}
 			}
 			Method setter = getSetterMethod(toField.getName());
@@ -170,23 +172,23 @@ public class MapClass implements MapUnit {
 							+ " value is not avaible for set");
 				}
 			}
-			
+
 			MapField unit = null;
-//			if (fieldClassIsMapped) {
-//				logger.info("Field is mapped {}.{} -> {}.{}",
-//						fromClass.getName(), fromField.getName(),
-//						targetClass.getName(), toField.getName());
-//
-//				unit = new MapClass();
-//				unit.setFromClass(fromField.getType());
-//				unit.setTargetClass(toField.getType());
-//			} else { 
-				unit = new MapField();
-				unit.setFromClass(fromClass);
-				unit.setTargetClass(targetClass);
-//			}
-//			unit.setSetter(setter);
-//			unit.setGetter(getter);
+			// if (fieldClassIsMapped) {
+			// logger.info("Field is mapped {}.{} -> {}.{}",
+			// fromClass.getName(), fromField.getName(),
+			// targetClass.getName(), toField.getName());
+			//
+			// unit = new MapClass();
+			// unit.setFromClass(fromField.getType());
+			// unit.setTargetClass(toField.getType());
+			// } else {
+			unit = new MapField();
+			unit.setFromClass(fromClass);
+			unit.setTargetClass(targetClass);
+			// }
+			// unit.setSetter(setter);
+			// unit.setGetter(getter);
 			unit.setFromField(fromField);
 			unit.setTargetField(toField);
 			unit.getMap();
@@ -196,9 +198,6 @@ public class MapClass implements MapUnit {
 		logger.info("Mapping done: class {}", fromClass.getName());
 	}
 
-
-
-	
 	private Method getGetterMethod(String fieldName) {
 		Method[] methods = fromClass.getDeclaredMethods();
 		String getterName = "get" + fieldName;
@@ -225,6 +224,5 @@ public class MapClass implements MapUnit {
 	public Set<MapField> getFields() {
 		return classFields;
 	}
-
 
 }

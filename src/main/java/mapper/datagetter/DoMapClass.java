@@ -26,7 +26,6 @@ public class DoMapClass {
 		}
 
 		for (MapField f : map.getFields()) {
-			Object fieldValue = mapper.datagetter.DataGetter.getData(f, fromObject);
 			targetObject = map(fromObject, targetObject,f);
 		}
 

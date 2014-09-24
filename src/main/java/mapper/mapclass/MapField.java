@@ -16,27 +16,22 @@ public class MapField implements MapUnit {
 	Method getter;
 	Method setter;
 
-	
 	public void setFromField(Field from) {
 		this.fromField = from;
 	}
 
-	
 	public Field getFromField() {
-		return fromField; 
+		return fromField;
 	}
 
-	
 	public void setTargetField(Field target) {
 		this.targetField = target;
 	}
 
-	
 	public Field getTargetField() {
 		return targetField;
 	}
 
-	
 	public void getMap() throws MapperException {
 		if (targetField == null || fromField == null) {
 			throw new MapperException("From and target field are null");
@@ -101,7 +96,6 @@ public class MapField implements MapUnit {
 		return null;
 	}
 
-
 	public Class<?> getFromClass() {
 		return fromClass;
 	}
@@ -122,11 +116,9 @@ public class MapField implements MapUnit {
 		this.getter = getter;
 	}
 
-	
 	public Method getGetter() {
 		return getter;
 	}
-
 
 	@Override
 	public Set<MapField> getFields() {

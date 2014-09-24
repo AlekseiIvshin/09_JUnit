@@ -1,15 +1,8 @@
 package mapper.datagetter;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import mapper.MapperException;
 import mapper.mapclass.MapField;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class for hidden process of setting data to field
@@ -18,8 +11,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class DataSetter {
-
-	final static Logger logger = LoggerFactory.getLogger(DataGetter.class);
 
 	/**
 	 * Set data to field
