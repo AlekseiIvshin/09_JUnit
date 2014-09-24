@@ -21,22 +21,22 @@ public class MapField implements MapUnit<Field> {
 	Method setter;
 
 	@Override
-	public void setFrom(Field from) {
+	public void setFromField(Field from) {
 		this.fromField = from;
 	}
 
 	@Override
-	public Field getFrom() {
+	public Field getFromField() {
 		return fromField;
 	}
 
 	@Override
-	public void setTarget(Field target) {
+	public void setTargetField(Field target) {
 		this.targetField = target;
 	}
 
 	@Override
-	public Field getTarget() {
+	public Field getTargetField() {
 		return targetField;
 	}
 
@@ -149,6 +149,16 @@ public class MapField implements MapUnit<Field> {
 			}
 		}
 		return targetObject;
+	}
+
+	@Override
+	public Class<?> getFromClass() {
+		return fromClass;
+	}
+
+	@Override
+	public Class<?> getTargetClass() {
+		return targetClass;
 	}
 
 }

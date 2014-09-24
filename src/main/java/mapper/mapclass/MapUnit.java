@@ -1,13 +1,21 @@
 package mapper.mapclass;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import mapper.MapperException;
 
 public interface MapUnit<T> {
 
-	void setFrom(T from);
-	T getFrom();
-	void setTarget(T target);
-	T getTarget();
+	void setFromClass(Class<?> from);
+	Class<?> getFromClass();
+	void setTargetClass(Class<?> target);
+	Class<?> getTargetClass();
+	
+	void setFromField(Field from);
+	Field getFromField();
+	void setTargetField(Field target);
+	Field getTargetField();
 	
 	
 	void getMap() throws MapperException;

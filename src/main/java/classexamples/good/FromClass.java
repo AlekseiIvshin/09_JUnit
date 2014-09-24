@@ -15,7 +15,7 @@ public class FromClass {
 	@FieldName("userLastName")
 	public String lastName;
 	
-	@FieldName("ta")
+	//@FieldName("ta")
 	public FA fa;
 	
 	

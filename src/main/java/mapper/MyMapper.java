@@ -18,8 +18,8 @@ public class MyMapper implements Mapper {
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
 	public Object map(Object fromObj, Object targetObject) throws MapperException {
-		if(!fromObj.getClass().equals(classMap.getFrom())){
-			throw new MapperException("Classes are not equals: " +fromObj.getClass()+" != "+classMap.getFrom());
+		if(!fromObj.getClass().equals(classMap.getFromClass())){
+			throw new MapperException("Classes are not equals: " +fromObj.getClass()+" != "+classMap.getFromClass());
 		}
 		
 		return classMap.map(fromObj, targetObject);
@@ -34,8 +34,8 @@ public class MyMapper implements Mapper {
 			throw new MapperException(
 					"Can't find target 'ClassTarget' annotation");
 		}
-		classMap.setFrom(fromClass);
-		classMap.setTarget(toClass);
+		classMap.setFromClass(fromClass);
+		classMap.setTargetClass(toClass);
 		classMap.getMap();
 	}
 

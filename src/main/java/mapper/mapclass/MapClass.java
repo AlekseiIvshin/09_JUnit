@@ -2,6 +2,9 @@ package mapper.mapclass;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +24,11 @@ public class MapClass implements MapUnit<Class<?>> {
 
 	Class<?> fromClass;
 	Class<?> targetClass;
+	Field fromField;
+	Field targetField;
 	Set<MapUnit> classFields;
+	Method getter;
+	Method setter;
 
 	public MapClass() {
 		classFields = new HashSet<MapUnit>();
@@ -38,22 +45,40 @@ public class MapClass implements MapUnit<Class<?>> {
 	}
 
 	@Override
-	public void setFrom(Class<?> from) {
+	public void setFromClass(Class<?> from) {
 		this.fromClass = from;
 	}
 
 	@Override
-	public Class<?> getFrom() {
+	public Class<?> getFromClass() {
 		return fromClass;
+	}
+	@Override
+	public void setFromField(Field from) {
+		this.fromField = from;
 	}
 
 	@Override
-	public void setTarget(Class<?> target) {
+	public Field getFromField() {
+		return fromField;
+	}
+
+	@Override
+	public void setTargetField(Field target) {
+		this.targetField = target;
+	}
+
+	@Override
+	public Field getTargetField() {
+		return targetField;
+	}
+	@Override
+	public void setTargetClass(Class<?> target) {
 		this.targetClass = target;
 	}
 
 	@Override
-	public Class<?> getTarget() {
+	public Class<?> getTargetClass() {
 		return targetClass;
 	}
 
@@ -155,25 +180,42 @@ public class MapClass implements MapUnit<Class<?>> {
 
 			boolean fieldClassIsMapped = isMapped(fromField.getType());
 
-			if (fieldClassIsMapped) {
-				logger.info("Field is mapped {}.{} -> {}.{}",
-						fromClass.getName(), fromField.getName(),
-						targetClass.getName(), toField.getName());
-
-				MapClass mapCLass = new MapClass();
-				mapCLass.setFrom(fromField.getType());
-				mapCLass.setTarget(toField.getType());
-				mapCLass.getMap();
-				addToMap(mapCLass);
-			} else {
-				MapField mapField = new MapField();
-				mapField.setFrom(fromField);
-				mapField.setTarget(toField);
-				mapField.setFromClass(fromClass);
-				mapField.setTargetClass(targetClass);
-				mapField.getMap();
-				addToMap(mapField);
+			Method getter = getGetterMethod(fromField.getName());
+			if (getter == null) {
+				if (!Modifier.isPublic(fromField.getModifiers())) {
+					throw new MapperException("Field " + fromClass.getName() + "."
+							+ fromField.getName() + " value is not avaible for get");
+				}
 			}
+			Method setter = getSetterMethod(toField.getName());
+			if (setter == null) {
+				if (!Modifier.isPublic(toField.getModifiers())) {
+					throw new MapperException("Field " + targetClass.getName()
+							+ "." + toField.getName()
+							+ " value is not avaible for set");
+				}
+			}
+			
+			MapUnit unit = null;
+//			if (fieldClassIsMapped) {
+//				logger.info("Field is mapped {}.{} -> {}.{}",
+//						fromClass.getName(), fromField.getName(),
+//						targetClass.getName(), toField.getName());
+//
+//				unit = new MapClass();
+//				unit.setFromClass(fromField.getType());
+//				unit.setTargetClass(toField.getType());
+//			} else { 
+				unit = new MapField();
+				unit.setFromClass(fromClass);
+				unit.setTargetClass(targetClass);
+//			}
+//			unit.setSetter(setter);
+//			unit.setGetter(getter);
+			unit.setFromField(fromField);
+			unit.setTargetField(toField);
+			unit.getMap();
+			addToMap(unit);
 		}
 
 		logger.info("Mapping done: class {}", fromClass.getName());
@@ -200,6 +242,7 @@ public class MapClass implements MapUnit<Class<?>> {
 		}
 
 		for (MapUnit f : classFields) {
+			Object fieldValue = f.getValue(fromObject);
 //			Object fieldValue = getValue(fromObject, f);
 //			System.err.println(fieldValue.getClass().getName()+" ? "+f.getFrom());
 			targetObject = f.map(fromObject, targetObject);
@@ -209,26 +252,74 @@ public class MapClass implements MapUnit<Class<?>> {
 		return targetObject;
 	}
 
-	public Object getValue(Object fromObject, MapUnit field) throws MapperException {
-		return field.getValue(fromObject);
-	}
-
-	public Object setValue(Object targetObject,MapUnit field, Object value)
-			throws MapperException {
-		return field.setValue(targetObject, value);
-	}
 
 	@Override
 	public Object getValue(Object fromObject) throws MapperException {
-		return fromObject;
+		if(fromField == null){
+			return fromObject;
+		} else {
+			if (getter == null) {
+				try {
+					return fromField.get(fromObject);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new MapperException(e.getMessage());
+				}
+			}
+			try {
+				return getter.invoke(fromObject);
+			} catch (IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				throw new MapperException(e.getCause());
+			}
+		}
 	}
 
 	@Override
 	public Object setValue(Object targetObject, Object value)
 			throws MapperException {
-		return targetObject;
+		if(targetField == null){
+			return targetObject;
+		} else {
+			if (setter == null) {
+				try {
+					targetField.set(targetObject, value);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new MapperException(e.getCause());
+				}
+			} else {
+				try {
+					setter.invoke(targetObject, value);
+				} catch (IllegalArgumentException | IllegalAccessException
+						| InvocationTargetException e) {
+					throw new MapperException(e.getCause());
+				}
+			}
+			return targetObject;
+		}
 	}
 
 	
+	private Method getGetterMethod(String fieldName) {
+		Method[] methods = fromClass.getDeclaredMethods();
+		String getterName = "get" + fieldName;
+		for (Method m : methods) {
+			if (m.getName().equalsIgnoreCase(getterName)) {
+				return m;
+			}
+		}
+		return null;
+	}
+
+	private Method getSetterMethod(String fieldName) {
+		Method[] methods = targetClass.getDeclaredMethods();
+		String getterName = "set" + fieldName;
+		for (Method m : methods) {
+			if (m.getName().equalsIgnoreCase(getterName)) {
+				return m;
+			}
+		}
+		return null;
+	}
+
 
 }
