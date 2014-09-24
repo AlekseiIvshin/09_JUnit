@@ -3,6 +3,7 @@ package mapper;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
+import mapper.datagetter.DoMapClass;
 import mapper.mapclass.MapClass;
 
 import org.slf4j.Logger;
@@ -21,8 +22,8 @@ public class MyMapper implements Mapper {
 		if(!fromObj.getClass().equals(classMap.getFromClass())){
 			throw new MapperException("Classes are not equals: " +fromObj.getClass()+" != "+classMap.getFromClass());
 		}
-		
-		return classMap.map(fromObj, targetObject);
+		DoMapClass doMapClass = new DoMapClass();
+		return doMapClass.map(fromObj, targetObject, classMap);
 	}
 
 	@Override
@@ -144,7 +145,5 @@ public class MyMapper implements Mapper {
 		throw new MapperException("Field not found: " + targetClass.getName()
 				+ "." + targetFieldName);
 	}
-
-
 
 }

@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sun.org.apache.xpath.internal.operations.Mod;
 
@@ -27,7 +29,7 @@ public class MapField implements MapUnit {
 
 	
 	public Field getFromField() {
-		return fromField;
+		return fromField; 
 	}
 
 	
@@ -75,17 +77,6 @@ public class MapField implements MapUnit {
 
 	}
 
-	
-	public Object map(Object fromObject, Object targetObject)
-			throws MapperException {
-		if (targetField == null || fromField == null) {
-			throw new MapperException("From and target fields are null");
-		}
-		Object value = getValue(fromObject);
-
-		return setValue(targetObject, value);
-	}
-
 	public void setFromClass(Class<?> fromClass) {
 		this.fromClass = fromClass;
 	}
@@ -116,40 +107,6 @@ public class MapField implements MapUnit {
 		return null;
 	}
 
-	public Object getValue(Object fromObject) throws MapperException {
-		if (getter == null) {
-			try {
-				return fromField.get(fromObject);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new MapperException(e.getMessage());
-			}
-		}
-		try {
-			return getter.invoke(fromObject);
-		} catch (IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			throw new MapperException(e.getCause());
-		}
-	}
-
-	public Object setValue(Object targetObject, Object value)
-			throws MapperException {
-		if (setter == null) {
-			try {
-				targetField.set(targetObject, value);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new MapperException(e.getCause());
-			}
-		} else {
-			try {
-				setter.invoke(targetObject, value);
-			} catch (IllegalArgumentException | IllegalAccessException
-					| InvocationTargetException e) {
-				throw new MapperException(e.getCause());
-			}
-		}
-		return targetObject;
-	}
 
 	public Class<?> getFromClass() {
 		return fromClass;
@@ -174,6 +131,12 @@ public class MapField implements MapUnit {
 	
 	public Method getGetter() {
 		return getter;
+	}
+
+
+	@Override
+	public Set<MapField> getFields() {
+		return null;
 	}
 
 }
