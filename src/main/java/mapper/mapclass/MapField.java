@@ -1,16 +1,10 @@
 package mapper.mapclass;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
 import java.util.Set;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
-
-import annotation.FieldName;
-import mapper.DataGetter;
 import mapper.MapperException;
 
 public class MapField implements MapUnit {
