@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 
 import mapper.MapperException;
 
-public interface MapUnit<T> {
+public interface MapUnit {
 
 	void setFromClass(Class<?> from);
 	Class<?> getFromClass();

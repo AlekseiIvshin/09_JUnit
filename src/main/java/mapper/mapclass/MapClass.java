@@ -19,7 +19,7 @@ import mapper.DataGetter;
 import mapper.MapperException;
 import mapper.MyMapper;
 
-public class MapClass implements MapUnit<Class<?>> {
+public class MapClass implements MapUnit {
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
 	Class<?> fromClass;

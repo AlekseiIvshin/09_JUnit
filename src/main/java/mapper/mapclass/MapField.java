@@ -11,7 +11,7 @@ import annotation.FieldName;
 import mapper.DataGetter;
 import mapper.MapperException;
 
-public class MapField implements MapUnit<Field> {
+public class MapField implements MapUnit {
 
 	Class<?> fromClass;
 	Class<?> targetClass;
@@ -20,27 +20,27 @@ public class MapField implements MapUnit<Field> {
 	Method getter;
 	Method setter;
 
-	@Override
+	
 	public void setFromField(Field from) {
 		this.fromField = from;
 	}
 
-	@Override
+	
 	public Field getFromField() {
 		return fromField;
 	}
 
-	@Override
+	
 	public void setTargetField(Field target) {
 		this.targetField = target;
 	}
 
-	@Override
+	
 	public Field getTargetField() {
 		return targetField;
 	}
 
-	@Override
+	
 	public void getMap() throws MapperException {
 		if (targetField == null || fromField == null) {
 			throw new MapperException("From and target field are null");
@@ -75,7 +75,7 @@ public class MapField implements MapUnit<Field> {
 
 	}
 
-	@Override
+	
 	public Object map(Object fromObject, Object targetObject)
 			throws MapperException {
 		if (targetField == null || fromField == null) {
@@ -151,14 +151,29 @@ public class MapField implements MapUnit<Field> {
 		return targetObject;
 	}
 
-	@Override
 	public Class<?> getFromClass() {
 		return fromClass;
 	}
 
-	@Override
 	public Class<?> getTargetClass() {
 		return targetClass;
+	}
+
+	public void setSetter(Method setter) {
+		this.setter = setter;
+	}
+
+	public Method getSetter() {
+		return setter;
+	}
+
+	public void setGetter(Method getter) {
+		this.getter = getter;
+	}
+
+	
+	public Method getGetter() {
+		return getter;
 	}
 
 }
