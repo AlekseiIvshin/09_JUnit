@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sun.org.apache.xpath.internal.operations.Mod;
 
@@ -11,7 +13,7 @@ import annotation.FieldName;
 import mapper.DataGetter;
 import mapper.MapperException;
 
-public class MapField implements MapUnit<Field> {
+public class MapField implements MapUnit {
 
 	Class<?> fromClass;
 	Class<?> targetClass;
@@ -20,27 +22,27 @@ public class MapField implements MapUnit<Field> {
 	Method getter;
 	Method setter;
 
-	@Override
+	
 	public void setFromField(Field from) {
 		this.fromField = from;
 	}
 
-	@Override
+	
 	public Field getFromField() {
-		return fromField;
+		return fromField; 
 	}
 
-	@Override
+	
 	public void setTargetField(Field target) {
 		this.targetField = target;
 	}
 
-	@Override
+	
 	public Field getTargetField() {
 		return targetField;
 	}
 
-	@Override
+	
 	public void getMap() throws MapperException {
 		if (targetField == null || fromField == null) {
 			throw new MapperException("From and target field are null");
@@ -75,17 +77,6 @@ public class MapField implements MapUnit<Field> {
 
 	}
 
-	@Override
-	public Object map(Object fromObject, Object targetObject)
-			throws MapperException {
-		if (targetField == null || fromField == null) {
-			throw new MapperException("From and target fields are null");
-		}
-		Object value = getValue(fromObject);
-
-		return setValue(targetObject, value);
-	}
-
 	public void setFromClass(Class<?> fromClass) {
 		this.fromClass = fromClass;
 	}
@@ -116,49 +107,36 @@ public class MapField implements MapUnit<Field> {
 		return null;
 	}
 
-	public Object getValue(Object fromObject) throws MapperException {
-		if (getter == null) {
-			try {
-				return fromField.get(fromObject);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new MapperException(e.getMessage());
-			}
-		}
-		try {
-			return getter.invoke(fromObject);
-		} catch (IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			throw new MapperException(e.getCause());
-		}
-	}
 
-	public Object setValue(Object targetObject, Object value)
-			throws MapperException {
-		if (setter == null) {
-			try {
-				targetField.set(targetObject, value);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new MapperException(e.getCause());
-			}
-		} else {
-			try {
-				setter.invoke(targetObject, value);
-			} catch (IllegalArgumentException | IllegalAccessException
-					| InvocationTargetException e) {
-				throw new MapperException(e.getCause());
-			}
-		}
-		return targetObject;
-	}
-
-	@Override
 	public Class<?> getFromClass() {
 		return fromClass;
 	}
 
-	@Override
 	public Class<?> getTargetClass() {
 		return targetClass;
+	}
+
+	public void setSetter(Method setter) {
+		this.setter = setter;
+	}
+
+	public Method getSetter() {
+		return setter;
+	}
+
+	public void setGetter(Method getter) {
+		this.getter = getter;
+	}
+
+	
+	public Method getGetter() {
+		return getter;
+	}
+
+
+	@Override
+	public Set<MapField> getFields() {
+		return null;
 	}
 
 }

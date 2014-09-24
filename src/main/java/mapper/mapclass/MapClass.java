@@ -19,22 +19,20 @@ import mapper.DataGetter;
 import mapper.MapperException;
 import mapper.MyMapper;
 
-public class MapClass implements MapUnit<Class<?>> {
+public class MapClass implements MapUnit {
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
 	Class<?> fromClass;
 	Class<?> targetClass;
-	Field fromField;
-	Field targetField;
-	Set<MapUnit> classFields;
+	Set<MapField> classFields;
 	Method getter;
 	Method setter;
 
 	public MapClass() {
-		classFields = new HashSet<MapUnit>();
+		classFields = new HashSet<MapField>();
 	}
 
-	public void addToMap(MapUnit mapUnit) {
+	public void addToMap(MapField mapUnit) {
 		if (!classFields.contains(mapUnit)) {
 			classFields.add(mapUnit);
 		}
@@ -52,25 +50,6 @@ public class MapClass implements MapUnit<Class<?>> {
 	@Override
 	public Class<?> getFromClass() {
 		return fromClass;
-	}
-	@Override
-	public void setFromField(Field from) {
-		this.fromField = from;
-	}
-
-	@Override
-	public Field getFromField() {
-		return fromField;
-	}
-
-	@Override
-	public void setTargetField(Field target) {
-		this.targetField = target;
-	}
-
-	@Override
-	public Field getTargetField() {
-		return targetField;
 	}
 	@Override
 	public void setTargetClass(Class<?> target) {
@@ -196,7 +175,7 @@ public class MapClass implements MapUnit<Class<?>> {
 				}
 			}
 			
-			MapUnit unit = null;
+			MapField unit = null;
 //			if (fieldClassIsMapped) {
 //				logger.info("Field is mapped {}.{} -> {}.{}",
 //						fromClass.getName(), fromField.getName(),
@@ -221,82 +200,7 @@ public class MapClass implements MapUnit<Class<?>> {
 		logger.info("Mapping done: class {}", fromClass.getName());
 	}
 
-	@Override
-	public Object map(Object fromObject, Object targetObject)
-			throws MapperException {
-		if (targetObject == null) {
-			try {
-				targetObject = targetClass.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new MapperException(e.getCause());
-			}
-		}
 
-		if (!targetObject.getClass().equals(targetClass)
-				|| !fromObject.getClass().equals(fromClass)) {
-			throw new MapperException("Wrong parameter classes: FROM ["
-					+ fromClass.getName() + " & "
-					+ fromObject.getClass().getName() + "]" + " TARGET ["
-					+ targetClass.getName() + " & "
-					+ targetObject.getClass().getName() + "]");
-		}
-
-		for (MapUnit f : classFields) {
-			Object fieldValue = f.getValue(fromObject);
-//			Object fieldValue = getValue(fromObject, f);
-//			System.err.println(fieldValue.getClass().getName()+" ? "+f.getFrom());
-			targetObject = f.map(fromObject, targetObject);
-			//targetObject = setValue(targetObject, f, res);
-		}
-
-		return targetObject;
-	}
-
-
-	@Override
-	public Object getValue(Object fromObject) throws MapperException {
-		if(fromField == null){
-			return fromObject;
-		} else {
-			if (getter == null) {
-				try {
-					return fromField.get(fromObject);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new MapperException(e.getMessage());
-				}
-			}
-			try {
-				return getter.invoke(fromObject);
-			} catch (IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
-				throw new MapperException(e.getCause());
-			}
-		}
-	}
-
-	@Override
-	public Object setValue(Object targetObject, Object value)
-			throws MapperException {
-		if(targetField == null){
-			return targetObject;
-		} else {
-			if (setter == null) {
-				try {
-					targetField.set(targetObject, value);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new MapperException(e.getCause());
-				}
-			} else {
-				try {
-					setter.invoke(targetObject, value);
-				} catch (IllegalArgumentException | IllegalAccessException
-						| InvocationTargetException e) {
-					throw new MapperException(e.getCause());
-				}
-			}
-			return targetObject;
-		}
-	}
 
 	
 	private Method getGetterMethod(String fieldName) {
@@ -319,6 +223,11 @@ public class MapClass implements MapUnit<Class<?>> {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Set<MapField> getFields() {
+		return classFields;
 	}
 
 
