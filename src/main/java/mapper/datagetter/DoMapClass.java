@@ -39,7 +39,7 @@ public class DoMapClass implements DoMap{
 		return setData(map, targetObject, value);
 	}
 	
-	public static Object setData(MapField field, Object targetObj, Object value)
+	public Object setData(MapField field, Object targetObj, Object value)
 			throws MapperException {
 		if (field.getSetter() == null) {
 			try {
@@ -58,10 +58,13 @@ public class DoMapClass implements DoMap{
 		return targetObj;
 	}
 	
-	public static Object getData(MapField field, Object obj)
+	public Object getData(MapField field, Object obj)
 			throws MapperException {
 		if (field == null) {
 			throw new MapperException("Field is null");
+		}
+		if(field.getSourceField() == null){
+			throw new MapperException("Source field is null");
 		}
 		
 		if (field.getGetter() == null) {

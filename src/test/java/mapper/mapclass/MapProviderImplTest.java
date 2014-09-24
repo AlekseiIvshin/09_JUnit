@@ -30,5 +30,12 @@ public class MapProviderImplTest {
 		MapProviderImpl prov = new MapProviderImpl();
 		assertNotNull(prov.getFields());
 	}
+	
+	@Test
+	public void testGetFieldsOnEmpty() {
+		MapProviderImpl prov = new MapProviderImpl();
+		assertEquals(prov.getFields().size(),0);
+	}
+	
 
 }

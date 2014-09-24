@@ -62,7 +62,7 @@ public class MyMapperTest {
 		Mapper mapper = new MyMapper();
 		mapper.setMapProvider(new MapProviderImpl());
 		mapper.setTransferProvider(new DoMapClass());
-		mapper.map(Mockito.any(), Mockito.any());
+		mapper.map(mockFrom, mockTo);
 	}
 	
 	@Test
@@ -78,6 +78,16 @@ public class MyMapperTest {
 		assertEquals(result.userName, fromObject.name);
 	}
 	
+	@Test
+	public void testNotNullMapProviderWithoutItInit(){
+		Mapper mapper = new MyMapper();
+		assertNull("Map provider not initialize, but it is not null", mapper.getMapProvider());
+	}
+	@Test
+	public void testNotNullTransferProviderWithoutItInit(){
+		Mapper mapper = new MyMapper();
+		assertNull("Transfer provider not initialize, but it is not null", mapper.getTransferProvider());
+	}
 	
 	
 	@Test
