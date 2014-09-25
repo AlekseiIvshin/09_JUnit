@@ -15,21 +15,26 @@ public class DataTransferImpl implements DataTransfer {
 		if (sourceObject == null) {
 			throw new MapperException("Source object is null");
 		}
+		if(usingMap == null){
+			throw new MapperException("Map is null");
+		}
+
+		if (!usingMap.sourceEquals(sourceObject.getClass())
+				|| (targetObject != null 
+				&& !usingMap.targetEquals(targetObject.getClass()))) {
+			throw new MapperException("Wrong classes of parameters: "
+					+ sourceObject.getClass().getName() + " & "
+					+ usingMap.getSourceClass().getName() + " -> "
+					+ targetObject.getClass().getName() + " & "
+					+ usingMap.getTargetClass().getName());
+		}
+
 		if (targetObject == null) {
 			try {
 				targetObject = usingMap.getTargetClass().newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new MapperException(e.getMessage());
 			}
-		}
-
-		if (!targetObject.getClass().equals(usingMap.getTargetClass())
-				|| !sourceObject.getClass().equals(usingMap.getSourceClass())) {
-			throw new MapperException("Wrong classes of parameters: "
-					+ sourceObject.getClass().getName() + " & "
-					+ usingMap.getSourceClass().getName() + " -> "
-					+ targetObject.getClass().getName() + " & "
-					+ usingMap.getTargetClass().getName());
 		}
 
 		for (MapItem f : usingMap.getClassFields()) {
@@ -47,7 +52,7 @@ public class DataTransferImpl implements DataTransfer {
 	private Object mapField(Object sourceObject, Object targetObject,
 			FieldItem map) throws MapperException {
 		if (map.getTargetField() == null || map.getSourceField() == null) {
-			throw new MapperException("Source and target fields are null");
+			throw new MapperException("Source or target fields are null");
 		}
 		Object value = getData(map, sourceObject);
 

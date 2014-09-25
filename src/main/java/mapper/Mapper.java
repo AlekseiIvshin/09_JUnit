@@ -1,8 +1,6 @@
 package mapper;
 
-import mapper.datagetter.DoMap;
 import mapper.datatransfer.DataTransfer;
-import mapper.mapclass.MapProvider;
 import mapper.mapping.ClassMapper;
 
 public interface Mapper {

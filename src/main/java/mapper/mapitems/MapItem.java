@@ -2,10 +2,7 @@ package mapper.mapitems;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Set;
-
-import mapper.mapclass.MapField;
 
 public abstract class MapItem{
 
@@ -60,6 +57,15 @@ public abstract class MapItem{
 	
 	public boolean isEmpty(){
 		return sourceClass == null;
+	}
+	
+
+	public boolean sourceEquals(Class<?> sourceClass) {
+		return this.sourceClass.equals(sourceClass);
+	}
+
+	public boolean targetEquals(Class<?> targetClass) {
+		return this.targetClass.equals(targetClass);
 	}
 	
 	abstract public boolean isMappedClass();
