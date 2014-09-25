@@ -21,20 +21,13 @@ public class DataTransferImpl implements DataTransfer {
 			throw new DataTransferException("Source object is null");
 		}
 
-		if (!map.sourceEquals(sourceObject.getClass())
-				|| (targetObject != null && !map.targetEquals(targetObject
-						.getClass()))) {
-			String whatWrong = "";
-			if(targetObject == null){
-				whatWrong = " null (target object is null)";
-			} else {
-				whatWrong+=targetObject.getClass().getName() + " & "
-						+ map.getTargetClass().getName();
-			}
-			throw new DataTransferException("Wrong classes of parameters: "
-					+ sourceObject.getClass().getName() + " & "
-					+ map.getSourceClass().getName() + " -> "
-					+ whatWrong);
+		if (!map.sourceEquals(sourceObject.getClass())) {
+
+			throw new DataTransferException(
+					"Wrong classes of parameters: Expect ["
+							+ map.getSourceClass().getName()
+							+ "] -> Received ["
+							+ sourceObject.getClass().getName() + "]");
 		}
 
 		if (targetObject == null) {
@@ -42,6 +35,14 @@ public class DataTransferImpl implements DataTransfer {
 				targetObject = map.getTargetClass().newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new DataTransferException(e.getMessage());
+			}
+		} else {
+			if (!map.targetEquals(targetObject.getClass())) {
+				throw new DataTransferException(
+						"Wrong classes of parameters: Expect ["
+								+ map.getTargetClass().getName()
+								+ "] -> Received ["
+								+ targetObject.getClass().getName() + "]");
 			}
 		}
 
@@ -69,10 +70,10 @@ public class DataTransferImpl implements DataTransfer {
 
 	public Object setData(MapItem field, Object targetObj, Object value)
 			throws DataTransferException {
-		if(targetObj == null){
+		if (targetObj == null) {
 			throw new DataTransferException("Target object is null");
 		}
-		if(field == null ){
+		if (field == null) {
 			throw new DataTransferException("Map is null");
 		}
 		if (field.getTargetField() == null) {
@@ -95,11 +96,12 @@ public class DataTransferImpl implements DataTransfer {
 		return targetObj;
 	}
 
-	public Object getData(MapItem field, Object obj) throws DataTransferException {
-		if(obj == null){
+	public Object getData(MapItem field, Object obj)
+			throws DataTransferException {
+		if (obj == null) {
 			throw new DataTransferException("Source object is null");
 		}
-		if (field == null ) {
+		if (field == null) {
 			throw new DataTransferException("Map is null is null");
 		}
 		if (field.getSourceField() == null) {
@@ -121,7 +123,8 @@ public class DataTransferImpl implements DataTransfer {
 		}
 	}
 
-	private Object mapValue(ClassItem field, Object obj) throws DataTransferException {
+	private Object mapValue(ClassItem field, Object obj)
+			throws DataTransferException {
 		try {
 			return map(obj, field.getTargetClass().newInstance(),
 					new RootItem<MapItem>(field));
@@ -130,7 +133,8 @@ public class DataTransferImpl implements DataTransfer {
 		}
 	}
 
-	private Object mapValue(FieldItem field, Object obj) throws DataTransferException {
+	private Object mapValue(FieldItem field, Object obj)
+			throws DataTransferException {
 		return obj;
 	}
 

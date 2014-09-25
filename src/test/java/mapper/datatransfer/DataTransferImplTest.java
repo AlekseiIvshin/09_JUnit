@@ -144,6 +144,14 @@ public class DataTransferImplTest {
 		exception.expectMessage("Wrong classes of parameters");
 		mapClass.map(mockTo,mockSource,new RootItem<MapItem>(mapFromClassToClass));
 	}
+	
+
+	@Test
+	public void testTargetClassesNotEquals() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Wrong classes of parameters");
+		mapClass.map(sourceObject,mockSource,new RootItem<MapItem>(mapFromClassToClass));
+	}
 
 
 	@Test

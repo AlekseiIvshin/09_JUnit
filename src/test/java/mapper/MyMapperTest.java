@@ -80,6 +80,21 @@ public class MyMapperTest {
 		assertEquals(result.userName, fromObject.name);
 		assertEquals(result.ta.dNumber, fromObject.fa.number);
 	}
+	
+	@Test
+	public void testMapTargetNull() throws MappingException, DataTransferException {
+		Mapper mapper = new MyMapper();
+		mapper.setMapProvider(new ClassMapperImpl());
+		mapper.setTransferProvider(new DataTransferImpl());
+		mapper.prepareMap(FromClass.class);
+		ToClass result = null;
+		assertNotNull("Result is null",
+				(result = (ToClass) mapper.map(fromObject, null)));
+		assertEquals(result.userId, fromObject.getId());
+		assertEquals(result.userLastName, fromObject.lastName);
+		assertEquals(result.userName, fromObject.name);
+		assertEquals(result.ta.dNumber, fromObject.fa.number);
+	}
 
 	@Test
 	public void testNotNullMapProviderWithoutItInit() {
