@@ -75,6 +75,7 @@ public class MyMapperTest {
 		assertEquals(result.userId, fromObject.getId());
 		assertEquals(result.userLastName, fromObject.lastName);
 		assertEquals(result.userName, fromObject.name);
+		assertEquals(result.ta.dNumber, fromObject.fa.number);
 	}
 
 	@Test

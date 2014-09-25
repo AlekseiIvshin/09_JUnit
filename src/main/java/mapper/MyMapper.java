@@ -1,6 +1,8 @@
 package mapper;
 
 import mapper.datatransfer.DataTransfer;
+import mapper.mapitems.MapItem;
+import mapper.mapitems.RootItem;
 import mapper.mapping.ClassMapper;
 
 import org.slf4j.Logger;
@@ -18,8 +20,7 @@ public class MyMapper implements Mapper {
 		if (currentProvider.getMap().isEmpty()) {
 			throw new MapperException("Map of class is missing");
 		}
-		return transferProvider.map(fromObj, targetObject,
-				currentProvider.getMap());
+		return transferProvider.map(fromObj, targetObject, new RootItem<MapItem>(currentProvider.getMap()));
 	}
 
 	public void prepareMap(Class<?> fromClass) throws MapperException {

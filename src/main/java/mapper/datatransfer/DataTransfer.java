@@ -2,9 +2,11 @@ package mapper.datatransfer;
 
 import mapper.MapperException;
 import mapper.mapitems.ClassItem;
+import mapper.mapitems.MapItem;
+import mapper.mapitems.RootItem;
 
 public interface DataTransfer {
 
-	Object map(Object sourceObject, Object targetObject, ClassItem usingMap)
+	Object map(Object sourceObject, Object targetObject, RootItem<MapItem> usingMap)
 			throws MapperException;
 }

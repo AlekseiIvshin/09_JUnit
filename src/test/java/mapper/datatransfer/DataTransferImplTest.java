@@ -6,6 +6,7 @@ import mapper.MapperException;
 import mapper.mapitems.ClassItem;
 import mapper.mapitems.FieldItem;
 import mapper.mapitems.MapItem;
+import mapper.mapitems.RootItem;
 import mapper.mapping.ClassMapperImpl;
 
 import org.junit.Before;
@@ -57,7 +58,7 @@ public class DataTransferImplTest {
 	@Test(expected = MapperException.class)
 	public void testMapNullSourceObject() throws MapperException {
 		DataTransfer mapClass = new DataTransferImpl();
-		mapClass.map(null, mockTo, mockMapClass);
+		mapClass.map(null, mockTo, new RootItem<MapItem>(mockMapClass));
 	}
 	
 	@Test
@@ -74,7 +75,7 @@ public class DataTransferImplTest {
 		DataTransfer mapClass = new DataTransferImpl();
 		when(mockMapClass.sourceEquals(mockSource.getClass())).thenReturn(true);
 		when(mockMapClass.targetEquals(mockTo.getClass())).thenReturn(true);
-		mapClass.map(mockSource,mockTo,mockMapClass);
+		mapClass.map(mockSource,mockTo,new RootItem<MapItem>(mockMapClass));
 		verify(mockMapClass, times(1)).getClassFields();
 	}
 	
@@ -84,7 +85,7 @@ public class DataTransferImplTest {
 		DataTransfer mapClass = new DataTransferImpl();		
 		ToClass result = null;
 		assertNotNull("Result is null",
-				(result = (ToClass) mapClass.map(sourceObject, new ToClass(), mapFromClassToClass)));
+				(result = (ToClass) mapClass.map(sourceObject, new ToClass(), new RootItem<MapItem>(mapFromClassToClass))));
 		assertEquals(result.userId, sourceObject.getId());
 		assertEquals(result.userLastName, sourceObject.lastName);
 		assertEquals(result.userName, sourceObject.name);
@@ -99,7 +100,7 @@ public class DataTransferImplTest {
 		Mockito.<Class<?>>when(mockMapClass.getSourceClass()).thenReturn(FromClass.class);
 		Mockito.<ToClass>when((ToClass)mockMapClass.getTargetClass().newInstance()).thenReturn(new ToClass());
 		
-		mapClass.map(new FromClass(), null, mockMapClass);
+		mapClass.map(new FromClass(), null, new RootItem<MapItem>(mockMapClass));
 		verify(mockMapClass,times(1)).getTargetClass().newInstance();
 	}
 	
@@ -108,7 +109,7 @@ public class DataTransferImplTest {
 		exception.expect(MapperException.class);
 		exception.expectMessage("Wrong classes of parameters");
 		DataTransfer mapClass = new DataTransferImpl();
-		mapClass.map(mockTo,mockSource,mapFromClassToClass);
+		mapClass.map(mockTo,mockSource,new RootItem<MapItem>(mapFromClassToClass));
 	}
 
 
