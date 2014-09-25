@@ -3,6 +3,8 @@ package mapper.mapitems;
 import java.util.HashSet;
 import java.util.Set;
 
+import mapper.mapping.MappingException;
+
 public class ClassItem extends MapItem{
 
 	public ClassItem(){
@@ -20,16 +22,16 @@ public class ClassItem extends MapItem{
 	}
 
 	@Override
-	public void addFields(MapItem fields) {
-		if(!classFields.contains(fields)){
-			classFields.add(fields);
+	public void addFields(MapItem fields) throws MappingException {
+		if(classFields.contains(fields)){
+			throw new MappingException("Field already mapped");
 		}
+		classFields.add(fields);
 	}
 
 	@Override
 	public boolean isMappedClass() {
 		return true;
 	}
-
 
 }

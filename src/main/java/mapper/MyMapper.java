@@ -1,9 +1,11 @@
 package mapper;
 
 import mapper.datatransfer.DataTransfer;
+import mapper.datatransfer.DataTransferException;
 import mapper.mapitems.MapItem;
 import mapper.mapitems.RootItem;
 import mapper.mapping.ClassMapper;
+import mapper.mapping.MappingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +18,16 @@ public class MyMapper implements Mapper {
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
 	public Object map(Object fromObj, Object targetObject)
-			throws MapperException {
+			throws MappingException, DataTransferException {
 		if (currentProvider.getMap().isEmpty()) {
-			throw new MapperException("Map of class is missing");
+			throw new MappingException("Map of class is missing");
 		}
 		return transferProvider.map(fromObj, targetObject, new RootItem<MapItem>(currentProvider.getMap()));
 	}
 
-	public void prepareMap(Class<?> fromClass) throws MapperException {
+	public void prepareMap(Class<?> fromClass) throws MappingException {
 		if (currentProvider == null) {
-			throw new MapperException("Provider is null");
+			throw new MappingException("Provider is null");
 		}
 		currentProvider.createMap(fromClass);
 	}

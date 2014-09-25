@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 
+import mapper.mapping.MappingException;
+
 public abstract class MapItem{
 
 	Class<?> sourceClass;
@@ -53,7 +55,7 @@ public abstract class MapItem{
 	abstract public Set<MapItem> getClassFields();
 	abstract public void setClassFields(Set<MapItem> classFields);
 	
-	abstract public void addFields(MapItem fields);
+	abstract public void addFields(MapItem fields) throws MappingException;
 	
 	public boolean isEmpty(){
 		return sourceClass == null;
@@ -69,4 +71,5 @@ public abstract class MapItem{
 	}
 	
 	abstract public boolean isMappedClass();
+	
 }

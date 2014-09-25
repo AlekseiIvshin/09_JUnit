@@ -7,9 +7,6 @@ import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hibernate.cfg.SettingsFactory;
-
-import mapper.MapperException;
 import mapper.mapitems.ClassItem;
 import mapper.mapitems.FieldItem;
 import mapper.mapitems.MapItem;
@@ -29,14 +26,14 @@ public class ClassMapperImpl implements ClassMapper {
 	};
 
 	@Override
-	public void createMap(Class<?> sourceClass) throws MapperException {
+	public void createMap(Class<?> sourceClass) throws MappingException {
 		if(sourceClass == null){
-			throw new MapperException("Source class are null");
+			throw new MappingException("Source class are null");
 		}
 		Class<?> targetClass = getTargetClass(sourceClass);
 
 		if (classContainItself(sourceClass)) {
-			throw new MapperException("Class " + sourceClass.getName()
+			throw new MappingException("Class " + sourceClass.getName()
 					+ " contains itself in fields");
 		}
 
@@ -55,7 +52,7 @@ public class ClassMapperImpl implements ClassMapper {
 		return false;
 	}
 	
-	private Set<MapItem> getFieldsItems(Field[] fields, Class<?> targetClass) throws MapperException{
+	private Set<MapItem> getFieldsItems(Field[] fields, Class<?> targetClass) throws MappingException{
 		Set<MapItem> fieldItems = new HashSet<MapItem>();
 		for (Field sourceField : fields) {
 
@@ -70,7 +67,7 @@ public class ClassMapperImpl implements ClassMapper {
 			Method getter = getGetterMethod(sourceField.getName());
 			if (getter == null) {
 				if (!Modifier.isPublic(sourceField.getModifiers())) {
-					throw new MapperException("Field SOURCE_CLASS." + sourceField.getName()
+					throw new MappingException("Field SOURCE_CLASS." + sourceField.getName()
 							+ " value is not avaible for get");
 				}
 			}
@@ -78,7 +75,7 @@ public class ClassMapperImpl implements ClassMapper {
 			Method setter = getSetterMethod(targetField.getName());
 			if (setter == null) {
 				if (!Modifier.isPublic(targetField.getModifiers())) {
-					throw new MapperException("Field TARGET_CLASS." + targetField.getName()
+					throw new MappingException("Field TARGET_CLASS." + targetField.getName()
 							+ " value is not avaible for set");
 				}
 			}
@@ -87,7 +84,7 @@ public class ClassMapperImpl implements ClassMapper {
 
 			if (!fieldClassIsMapped) {
 				if (!sourceField.getType().equals(targetField.getType())) {
-					throw new MapperException(
+					throw new MappingException(
 							"Types of fields mapped not equals: SOURCE_CLASS."
 									+ sourceField.getName() + " -> TARGET_CLASS."
 									+ targetField.getName());
@@ -116,7 +113,7 @@ public class ClassMapperImpl implements ClassMapper {
 	
 	
 	public static Class<?> getTargetClass(Class<?> sourceClass)
-			throws MapperException {
+			throws MappingException {
 		Annotation[] annotations = sourceClass.getAnnotations();
 		for (Annotation a : annotations) {
 			if (a.annotationType().equals(ClassTarget.class)) {
@@ -124,11 +121,11 @@ public class ClassMapperImpl implements ClassMapper {
 				try {
 					return Class.forName(ct.value());
 				} catch (ClassNotFoundException e) {
-					throw new MapperException(e.getMessage());
+					throw new MappingException(e.getMessage());
 				}
 			}
 		}
-		throw new MapperException("Source class not contain annotation @ClassTarget");
+		throw new MappingException("Source class not contain annotation @ClassTarget");
 	}
 
 	private static boolean isMapped(Field field) {
@@ -137,7 +134,7 @@ public class ClassMapperImpl implements ClassMapper {
 	}
 
 	public Field getTargetField(Class<?> targetClass, Field sourceField)
-			throws MapperException {
+			throws MappingException {
 
 		FieldName fieldName = (FieldName) sourceField
 				.getAnnotation(FieldName.class);
@@ -150,7 +147,7 @@ public class ClassMapperImpl implements ClassMapper {
 				return tf;
 			}
 		}
-		throw new MapperException("Field was in annotation for SOURCE_CLASS." + sourceField.getName()
+		throw new MappingException("Field was in annotation for SOURCE_CLASS." + sourceField.getName()
 				+ " but not found in target class");
 	}
 

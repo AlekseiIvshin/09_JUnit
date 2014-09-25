@@ -1,4 +1,4 @@
-package classexamples.bad;
+package classexamples.bad.withOutClassTargetAnnotation;
 
 public class ToClass {
 

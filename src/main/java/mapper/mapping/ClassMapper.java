@@ -1,11 +1,9 @@
 package mapper.mapping;
 
-import mapper.MapperException;
 import mapper.mapitems.ClassItem;
-import mapper.mapitems.MapItem;
 
 public interface ClassMapper {
 
-	void createMap(Class<?> sourceClass) throws MapperException;
+	void createMap(Class<?> sourceClass) throws MappingException;
 	ClassItem getMap();
 }

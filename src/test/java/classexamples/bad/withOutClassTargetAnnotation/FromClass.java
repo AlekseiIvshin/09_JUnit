@@ -1,6 +1,5 @@
-package classexamples.bad;
+package classexamples.bad.withOutClassTargetAnnotation;
 
-import annotation.ClassTarget;
 import annotation.FieldName;
 
 public class FromClass {

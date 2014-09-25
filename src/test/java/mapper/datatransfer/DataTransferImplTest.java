@@ -2,12 +2,17 @@ package mapper.datatransfer;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import mapper.MapperException;
+
+import java.lang.reflect.Field;
+import java.util.Iterator;
+import java.util.Random;
+
 import mapper.mapitems.ClassItem;
 import mapper.mapitems.FieldItem;
 import mapper.mapitems.MapItem;
 import mapper.mapitems.RootItem;
 import mapper.mapping.ClassMapperImpl;
+import mapper.mapping.MappingException;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -35,13 +40,18 @@ public class DataTransferImplTest {
 	@Mock
 	FieldItem mockMapField = mock(FieldItem.class);
 	
+	MapItem workedItem;
+	
+	DataTransferImpl mapClass;
+	
 	FromClass sourceObject;
 	ToClass targetObject;
 	
 	ClassItem mapFromClassToClass; 
 	
 	@Before
-	public void setUp() throws MapperException{
+	public void setUp() throws DataTransferException, MappingException{
+		mapClass = new DataTransferImpl();
 		ClassMapperImpl mapper = new ClassMapperImpl();
 		mapper.createMap(FromClass.class);
 		mapFromClassToClass = mapper.getMap();
@@ -53,44 +63,63 @@ public class DataTransferImplTest {
 		sourceObject.fa = new FA();
 		sourceObject.fa.setId("fa.id");
 		sourceObject.fa.number = 100;
+		
+		Random rnd = new Random();
+		Iterator<MapItem> iter = mapFromClassToClass.getClassFields().iterator();
+		int rnMax = rnd.nextInt(mapFromClassToClass.getClassFields().size());
+		int i=0;
+		while(iter.hasNext() && i<rnMax){
+			i++;
+			workedItem = iter.next();
+		}
 	}
 	
 	@Test
-	public void testOnCantCreateTargetInstance() throws MapperException{
-		exception.expect(MapperException.class);
+	public void testOnCantCreateTargetInstance() throws DataTransferException, MappingException{
+		exception.expect(DataTransferException.class);
 		exception.expectMessage("Wrong classes of parameters");
-		DataTransfer mapClass = new DataTransferImpl();
 		ClassMapperImpl mapper = new ClassMapperImpl();
 		mapper.createMap(classexamples.bad.coruptedOnTargetCreate.FromClass.class);
 		mapClass.map(mockSource, null, new RootItem<MapItem>(mapper.getMap()));		
 	}
 	
-	@Test(expected = MapperException.class)
-	public void testMapNullSourceObject() throws MapperException {
-		DataTransfer mapClass = new DataTransferImpl();
+	@Test(expected = DataTransferException.class)
+	public void testMapNullSourceObject() throws DataTransferException {
 		mapClass.map(null, mockTo, new RootItem<MapItem>(mockMapClass));
 	}
 	
 	@Test
-	public void testNullRootMap() throws MapperException{
-		exception.expect(MapperException.class);
+	public void testNullRootMap() throws DataTransferException{
+		exception.expect(DataTransferException.class);
 		exception.expectMessage("Map is null");
-		DataTransfer mapClass = new DataTransferImpl();
 		mapClass.map(mockSource,mockTo,null);
 	}
 	
 	@Test
-	public void testNullMap() throws MapperException{
-		exception.expect(MapperException.class);
+	public void testNullMap() throws DataTransferException{
+		exception.expect(DataTransferException.class);
 		exception.expectMessage("Map is null");
-		DataTransfer mapClass = new DataTransferImpl();
 		mapClass.map(mockSource,mockTo,new RootItem<MapItem>());
 	}
 	
 
 	@Test
-	public void testMapUseFieldList() throws MapperException{
-		DataTransfer mapClass = new DataTransferImpl();
+	public void testMapOnNullSource() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Source or target fields are null");
+		mapClass.mapItem(null, mockTo, mockMapClass);
+	}
+	
+
+	@Test
+	public void testMapOnNullTarget() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Source or target fields are null");
+		mapClass.mapItem(mockSource, null, mockMapClass);
+	}
+
+	@Test
+	public void testMapUseFieldList() throws DataTransferException{
 		when(mockMapClass.sourceEquals(mockSource.getClass())).thenReturn(true);
 		when(mockMapClass.targetEquals(mockTo.getClass())).thenReturn(true);
 		mapClass.map(mockSource,mockTo,new RootItem<MapItem>(mockMapClass));
@@ -99,8 +128,7 @@ public class DataTransferImplTest {
 	
 
 	@Test
-	public void testDataTransfer() throws MapperException{
-		DataTransfer mapClass = new DataTransferImpl();		
+	public void testDataTransfer() throws DataTransferException{
 		ToClass result = null;
 		assertNotNull("Result is null",
 				(result = (ToClass) mapClass.map(sourceObject, new ToClass(), new RootItem<MapItem>(mapFromClassToClass))));
@@ -109,30 +137,62 @@ public class DataTransferImplTest {
 		assertEquals(result.userName, sourceObject.name);
 	}
 	
-	@Ignore
-	@Test
-	public void testMapNullTargetObject() throws MapperException, InstantiationException, IllegalAccessException {
-		DataTransfer mapClass = new DataTransferImpl();
-		
-		Mockito.<Class<?>>when(mockMapClass.getTargetClass()).thenReturn(ToClass.class);
-		Mockito.<Class<?>>when(mockMapClass.getSourceClass()).thenReturn(FromClass.class);
-		Mockito.<ToClass>when((ToClass)mockMapClass.getTargetClass().newInstance()).thenReturn(new ToClass());
-		
-		mapClass.map(new FromClass(), null, new RootItem<MapItem>(mockMapClass));
-		verify(mockMapClass,times(1)).getTargetClass().newInstance();
-	}
 	
 	@Test
-	public void testSourceClassesNotEquals() throws MapperException{
-		exception.expect(MapperException.class);
+	public void testSourceClassesNotEquals() throws DataTransferException{
+		exception.expect(DataTransferException.class);
 		exception.expectMessage("Wrong classes of parameters");
-		DataTransfer mapClass = new DataTransferImpl();
 		mapClass.map(mockTo,mockSource,new RootItem<MapItem>(mapFromClassToClass));
 	}
 
 
-
+	@Test
+	public void testGetDateWithNullSource() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Source object is null");
+		mapClass.getData(workedItem, null);
+	}
 	
+	@Test
+	public void testGetDateWithNullMap() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Map is null");
+		mapClass.getData(null, mockSource);
+	}
+	
+
+	@Test
+	public void testGetDateWithNullMapGetSourceField() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Source field is null");
+		when(mockMapField.getSourceField()).thenReturn(null);
+		mapClass.getData(mockMapField, mockSource);
+	}
+	
+	@Test
+	public void testSetDateWithNullTarget() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Target object is null");
+		mapClass.setData(workedItem,null,mockSource);
+	}
+	@Test
+	public void testSetDateWithNullValue() throws DataTransferException{
+		mapClass.setData(workedItem,mockTo,null);
+	}
+	@Test
+	public void testSetDateWithNullMap() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Map is null");
+		mapClass.setData(null,mockTo,mockSource);
+	}
+	
+	@Test
+	public void testSetDateWithNullMapGetTargetField() throws DataTransferException{
+		exception.expect(DataTransferException.class);
+		exception.expectMessage("Source field is null");
+		when(mockMapField.getTargetField()).thenReturn(null);
+		mapClass.getData(mockMapField, mockSource);
+	}
 //	@Test
 //	public void testGetDataIfNoGetterNoFieldExpectedNullPointer() throws MapperException, IllegalArgumentException, IllegalAccessException, InstantiationException{
 //		DataTransfer mapClass = new DataTransferImpl();

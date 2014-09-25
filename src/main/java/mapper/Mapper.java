@@ -1,7 +1,9 @@
 package mapper;
 
 import mapper.datatransfer.DataTransfer;
+import mapper.datatransfer.DataTransferException;
 import mapper.mapping.ClassMapper;
+import mapper.mapping.MappingException;
 
 public interface Mapper {
 
@@ -9,11 +11,12 @@ public interface Mapper {
 	 * Map class to other class
 	 * @param fromClass 
 	 * @return 
-	 * @throws MapperException 
+	 * @throws MappingException 
+	 * @throws DataTransferException 
 	 */
-	public Object map(Object fromObject, Object targetObject) throws MapperException;
+	public Object map(Object fromObject, Object targetObject) throws MappingException, DataTransferException;
 	
-	public void prepareMap(Class<?> fromObject) throws MapperException;
+	public void prepareMap(Class<?> fromObject) throws MappingException;
 	
 	public <T extends ClassMapper> void setMapProvider(T provider);
 	public  ClassMapper getMapProvider();

@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.Field;
 
-import mapper.MapperException;
-
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,7 +23,7 @@ public class ClassMapperImplTest {
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
 	@Test
-	public void testCreateMap() throws MapperException {
+	public void testCreateMap() throws MappingException {
 		ClassMapper prov = new ClassMapperImpl();
 		prov.createMap(FromClass.class);
 		assertNotNull("Root map object not created", prov.getMap());
@@ -53,8 +51,8 @@ public class ClassMapperImplTest {
 	
 	@Ignore
 	@Test
-	public void testOnCheckSelfContain() throws MapperException{
-		exception.expect(MapperException.class);
+	public void testOnCheckSelfContain() throws MappingException{
+		exception.expect(MappingException.class);
 		exception.expectMessage("contains itself in fields");
 		when(mockMapper.classContainItself(FromClass.class)).thenReturn(true);
 		mockMapper.createMap(FromClass.class);
@@ -62,19 +60,19 @@ public class ClassMapperImplTest {
 	}
 	
 	@Test
-	public void testNullSourceClass() throws MapperException{
+	public void testNullSourceClass() throws MappingException{
 		ClassMapper prov = new ClassMapperImpl();
-		exception.expect(MapperException.class);
+		exception.expect(MappingException.class);
 		exception.expectMessage("Source class are null");
 		prov.createMap(null);
 	}
 	
 	@Test
-	public void testSourceNotHaveTargetClass() throws MapperException{
+	public void testSourceNotHaveTargetClass() throws MappingException{
 		ClassMapper prov = new ClassMapperImpl();
-		exception.expect(MapperException.class);
+		exception.expect(MappingException.class);
 		exception.expectMessage("Source class not contain annotation @ClassTarge");
-		prov.createMap(classexamples.bad.FA.class);
+		prov.createMap(classexamples.bad.withOutClassTargetAnnotation.FA.class);
 	}
 
 }
