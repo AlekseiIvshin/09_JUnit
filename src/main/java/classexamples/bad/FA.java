@@ -3,7 +3,6 @@ package classexamples.bad;
 import annotation.ClassTarget;
 import annotation.FieldName;
 
-@ClassTarget("classexamples.bad.TA")
 public class FA {
 
 	@FieldName("id")

@@ -4,6 +4,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hibernate.cfg.SettingsFactory;
 
 import mapper.MapperException;
 import mapper.mapitems.ClassItem;
@@ -26,21 +30,33 @@ public class ClassMapperImpl implements ClassMapper {
 
 	@Override
 	public void createMap(Class<?> sourceClass) throws MapperException {
-		Class<?> targetClass = getTargetClass(sourceClass);
-		if (targetClass == null || sourceClass == null) {
-			throw new MapperException("From and target field are null");
+		if(sourceClass == null){
+			throw new MapperException("Source class are null");
 		}
+		Class<?> targetClass = getTargetClass(sourceClass);
 
-		if (checkFieldsHaveThisClass(sourceClass)) {
+		if (classContainItself(sourceClass)) {
 			throw new MapperException("Class " + sourceClass.getName()
 					+ " contains itself in fields");
 		}
 
 		map.setSourceClass(sourceClass);
 		map.setTargetClass(targetClass);
-
-		Field[] fields = sourceClass.getDeclaredFields();
-
+		map.setClassFields(getFieldsItems(sourceClass.getDeclaredFields(), targetClass));
+	}
+	
+	public boolean classContainItself(Class<?> anyClass){
+		Field[] toClassFields = anyClass.getDeclaredFields();
+		for (Field tf : toClassFields) {
+			if (tf.getType().equals(anyClass)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private Set<MapItem> getFieldsItems(Field[] fields, Class<?> targetClass) throws MapperException{
+		Set<MapItem> fieldItems = new HashSet<MapItem>();
 		for (Field sourceField : fields) {
 
 			if (!isMapped(sourceField)) {
@@ -49,19 +65,12 @@ public class ClassMapperImpl implements ClassMapper {
 
 			Field targetField = getTargetField(targetClass, sourceField);
 
-			if (targetField == null) {
-				throw new MapperException("Field was in annotation for "
-						+ sourceClass.getName() + "." + sourceField.getName()
-						+ " but not found in " + targetClass.getName());
-			}
-
 			boolean fieldClassIsMapped = isMapped(sourceField.getType());
 
 			Method getter = getGetterMethod(sourceField.getName());
 			if (getter == null) {
 				if (!Modifier.isPublic(sourceField.getModifiers())) {
-					throw new MapperException("Field " + sourceClass.getName()
-							+ "." + sourceField.getName()
+					throw new MapperException("Field SOURCE_CLASS." + sourceField.getName()
 							+ " value is not avaible for get");
 				}
 			}
@@ -69,8 +78,7 @@ public class ClassMapperImpl implements ClassMapper {
 			Method setter = getSetterMethod(targetField.getName());
 			if (setter == null) {
 				if (!Modifier.isPublic(targetField.getModifiers())) {
-					throw new MapperException("Field " + targetClass.getName()
-							+ "." + targetField.getName()
+					throw new MapperException("Field TARGET_CLASS." + targetField.getName()
 							+ " value is not avaible for set");
 				}
 			}
@@ -80,10 +88,8 @@ public class ClassMapperImpl implements ClassMapper {
 			if (!fieldClassIsMapped) {
 				if (!sourceField.getType().equals(targetField.getType())) {
 					throw new MapperException(
-							"Types of fields mapped not equals: "
-									+ sourceClass.getName() + "."
-									+ sourceField.getName() + " -> "
-									+ targetClass.getName() + "."
+							"Types of fields mapped not equals: SOURCE_CLASS."
+									+ sourceField.getName() + " -> TARGET_CLASS."
 									+ targetField.getName());
 				}
 				item = new FieldItem();
@@ -100,12 +106,16 @@ public class ClassMapperImpl implements ClassMapper {
 			item.setTargetField(targetField);
 			item.setGetter(getter);
 			item.setSetter(setter);
-			map.addFields(item);
+			if(!fieldItems.contains(item)){
+				fieldItems.add(item);
+			}
 		}
-
+		return fieldItems;
 	}
 
-	private static Class<?> getTargetClass(Class<?> sourceClass)
+	
+	
+	public static Class<?> getTargetClass(Class<?> sourceClass)
 			throws MapperException {
 		Annotation[] annotations = sourceClass.getAnnotations();
 		for (Annotation a : annotations) {
@@ -118,17 +128,7 @@ public class ClassMapperImpl implements ClassMapper {
 				}
 			}
 		}
-		return null;
-	}
-
-	private static boolean checkFieldsHaveThisClass(Class<?> thisClass) {
-		Field[] toClassFields = thisClass.getDeclaredFields();
-		for (Field tf : toClassFields) {
-			if (tf.getType().equals(thisClass)) {
-				return true;
-			}
-		}
-		return false;
+		throw new MapperException("Source class not contain annotation @ClassTarget");
 	}
 
 	private static boolean isMapped(Field field) {
@@ -136,7 +136,7 @@ public class ClassMapperImpl implements ClassMapper {
 		return fieldName != null;
 	}
 
-	private static Field getTargetField(Class<?> targetClass, Field sourceField)
+	public Field getTargetField(Class<?> targetClass, Field sourceField)
 			throws MapperException {
 
 		FieldName fieldName = (FieldName) sourceField
@@ -150,8 +150,8 @@ public class ClassMapperImpl implements ClassMapper {
 				return tf;
 			}
 		}
-		throw new MapperException("Field not found: " + targetClass.getName()
-				+ "." + targetFieldName);
+		throw new MapperException("Field was in annotation for SOURCE_CLASS." + sourceField.getName()
+				+ " but not found in target class");
 	}
 
 	private Method getGetterMethod(String fieldName) {
