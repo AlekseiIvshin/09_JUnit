@@ -10,26 +10,31 @@ import mapper.mapitems.RootItem;
 
 public class DataTransferImpl implements DataTransfer {
 
-
 	@Override
 	public Object map(Object sourceObject, Object targetObject,
 			RootItem<MapItem> usingMap) throws MapperException {
-		if(usingMap == null){
+		if (usingMap == null || usingMap.get() == null) {
 			throw new MapperException("Map is null");
 		}
-		MapItem map  = usingMap.get();
+		MapItem map = usingMap.get();
 		if (sourceObject == null) {
 			throw new MapperException("Source object is null");
 		}
 
 		if (!map.sourceEquals(sourceObject.getClass())
-				|| (targetObject != null 
-				&& !map.targetEquals(targetObject.getClass()))) {
+				|| (targetObject != null && !map.targetEquals(targetObject
+						.getClass()))) {
+			String whatWrong = "";
+			if(targetObject == null){
+				whatWrong = " null (target object is null)";
+			} else {
+				whatWrong+=targetObject.getClass().getName() + " & "
+						+ map.getTargetClass().getName();
+			}
 			throw new MapperException("Wrong classes of parameters: "
 					+ sourceObject.getClass().getName() + " & "
 					+ map.getSourceClass().getName() + " -> "
-					+ targetObject.getClass().getName() + " & "
-					+ map.getTargetClass().getName());
+					+ whatWrong);
 		}
 
 		if (targetObject == null) {
@@ -44,20 +49,20 @@ public class DataTransferImpl implements DataTransfer {
 			targetObject = map(sourceObject, targetObject, f);
 		}
 
-		return targetObject;  
+		return targetObject;
 	}
-	
-	private Object map(Object sourceObject, Object targetObject,
-			MapItem map) throws MapperException {
+
+	private Object map(Object sourceObject, Object targetObject, MapItem map)
+			throws MapperException {
 		if (map.getTargetField() == null || map.getSourceField() == null) {
 			throw new MapperException("Source or target fields are null");
 		}
 		Object value = getData(map, sourceObject);
-		if(map.isMappedClass()){
-			value = mapValue((ClassItem)map, value);
-		 } else {
-			value = mapValue((FieldItem)map, value);
-		 }
+		if (map.isMappedClass()) {
+			value = mapValue((ClassItem) map, value);
+		} else {
+			value = mapValue((FieldItem) map, value);
+		}
 
 		return setData(map, targetObject, value);
 	}
@@ -103,15 +108,15 @@ public class DataTransferImpl implements DataTransfer {
 			throw new MapperException(e.getCause());
 		}
 	}
-	
+
 	private Object mapValue(ClassItem field, Object obj) throws MapperException {
 		try {
-			return map(obj, field.getTargetClass().newInstance(), new RootItem<MapItem>(field));
+			return map(obj, field.getTargetClass().newInstance(),
+					new RootItem<MapItem>(field));
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new MapperException(e.getMessage());
 		}
 	}
-	
 
 	private Object mapValue(FieldItem field, Object obj) throws MapperException {
 		return obj;

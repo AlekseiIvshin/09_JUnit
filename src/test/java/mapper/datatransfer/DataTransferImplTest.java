@@ -55,6 +55,16 @@ public class DataTransferImplTest {
 		sourceObject.fa.number = 100;
 	}
 	
+	@Test
+	public void testOnCantCreateTargetInstance() throws MapperException{
+		exception.expect(MapperException.class);
+		exception.expectMessage("Wrong classes of parameters");
+		DataTransfer mapClass = new DataTransferImpl();
+		ClassMapperImpl mapper = new ClassMapperImpl();
+		mapper.createMap(classexamples.bad.coruptedOnTargetCreate.FromClass.class);
+		mapClass.map(mockSource, null, new RootItem<MapItem>(mapper.getMap()));		
+	}
+	
 	@Test(expected = MapperException.class)
 	public void testMapNullSourceObject() throws MapperException {
 		DataTransfer mapClass = new DataTransferImpl();
@@ -62,11 +72,19 @@ public class DataTransferImplTest {
 	}
 	
 	@Test
-	public void testNullMap() throws MapperException{
+	public void testNullRootMap() throws MapperException{
 		exception.expect(MapperException.class);
 		exception.expectMessage("Map is null");
 		DataTransfer mapClass = new DataTransferImpl();
 		mapClass.map(mockSource,mockTo,null);
+	}
+	
+	@Test
+	public void testNullMap() throws MapperException{
+		exception.expect(MapperException.class);
+		exception.expectMessage("Map is null");
+		DataTransfer mapClass = new DataTransferImpl();
+		mapClass.map(mockSource,mockTo,new RootItem<MapItem>());
 	}
 	
 

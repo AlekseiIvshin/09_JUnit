@@ -1,7 +1,6 @@
 package mapper.datatransfer;
 
 import mapper.MapperException;
-import mapper.mapitems.ClassItem;
 import mapper.mapitems.MapItem;
 import mapper.mapitems.RootItem;
 
