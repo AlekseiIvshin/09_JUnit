@@ -3,8 +3,12 @@ package mapper;
 import static org.junit.Assert.*;
 import mapper.datagetter.DoMap;
 import mapper.datagetter.DoMapClass;
+import mapper.datatransfer.DataTransfer;
+import mapper.datatransfer.DataTransferImpl;
 import mapper.mapclass.MapProvider;
 import mapper.mapclass.MapProviderImpl;
+import mapper.mapping.ClassMapper;
+import mapper.mapping.ClassMapperImpl;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -30,9 +34,9 @@ public class MyMapperTest {
 	public ExpectedException exception = ExpectedException.none();
 	
 	@Mock
-	MapProvider mockMapProvider = mock(MapProviderImpl.class);
+	ClassMapper mockMapProvider = mock(ClassMapperImpl.class);
 	@Mock
-	DoMap mockDoMap = mock(DoMapClass.class);	
+	DataTransfer mockDoMap = mock(DataTransferImpl.class);	
 	@Mock
 	FromClass mockFrom = mock(FromClass.class);
 	@Mock
@@ -60,16 +64,16 @@ public class MyMapperTest {
 	@Test(expected = MapperException.class)
 	public void testNoEqualsMapAndObjectClasses() throws MapperException{
 		Mapper mapper = new MyMapper();
-		mapper.setMapProvider(new MapProviderImpl());
-		mapper.setTransferProvider(new DoMapClass());
+		mapper.setMapProvider(new ClassMapperImpl());
+		mapper.setTransferProvider(new DataTransferImpl());
 		mapper.map(mockFrom, mockTo);
 	}
 	
 	@Test
 	public void testMap() throws MapperException {
 		Mapper mapper = new MyMapper();
-		mapper.setMapProvider(new MapProviderImpl());
-		mapper.setTransferProvider(new DoMapClass());
+		mapper.setMapProvider(new ClassMapperImpl());
+		mapper.setTransferProvider(new DataTransferImpl());
 		mapper.prepareMap(FromClass.class);
 		ToClass result = null;
 		assertNotNull("Result is null",(result = (ToClass) mapper.map(fromObject, new ToClass())));
@@ -99,12 +103,21 @@ public class MyMapperTest {
 	}
 
 	@Test
+	public void testPrepareMapOnReal() throws MapperException{
+		Mapper mapper = new MyMapper();
+		mapper.setMapProvider(new ClassMapperImpl());
+		mapper.prepareMap(FromClass.class);
+		assertEquals(mapper.getMapProvider().getMap().getSourceClass(), FromClass.class);
+		assertEquals(mapper.getMapProvider().getMap().getTargetClass(), ToClass.class);
+	}
+	
+	@Test
 	public void testMissingMap() throws MapperException {
 		exception.expect(MapperException.class);
 		exception.expectMessage("Map of class is missing");
 		Mapper mapper = new MyMapper();
-		mapper.setMapProvider(new MapProviderImpl());
-		mapper.setTransferProvider(new DoMapClass());
+		mapper.setMapProvider(new ClassMapperImpl());
+		mapper.setTransferProvider(new DataTransferImpl());
 		mapper.map(mockFrom, mockTo);
 	}
 	

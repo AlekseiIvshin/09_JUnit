@@ -1,29 +1,27 @@
 package mapper;
 
-import mapper.datagetter.DoMap;
-import mapper.mapclass.MapClass;
-import mapper.mapclass.MapProvider;
+import mapper.datatransfer.DataTransfer;
+import mapper.mapping.ClassMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MyMapper implements Mapper {
 
-	private MapProvider currentProvider;
-	private DoMap transferProvider;
+	private ClassMapper currentProvider;
+	private DataTransfer transferProvider;
 
 	final static Logger logger = LoggerFactory.getLogger(MyMapper.class);
 
 	public Object map(Object fromObj, Object targetObject)
 			throws MapperException {
-		if (MapClass.isEmpty(currentProvider.getMap())) {
+		if (currentProvider.getMap().isEmpty()) {
 			throw new MapperException("Map of class is missing");
 		}
 		return transferProvider.map(fromObj, targetObject,
 				currentProvider.getMap());
 	}
 
-	@Override
 	public void prepareMap(Class<?> fromClass) throws MapperException {
 		if (currentProvider == null) {
 			throw new MapperException("Provider is null");
@@ -31,23 +29,19 @@ public class MyMapper implements Mapper {
 		currentProvider.createMap(fromClass);
 	}
 
-	@Override
-	public <T extends MapProvider> void setMapProvider(T provider) {
+	public <T extends ClassMapper> void setMapProvider(T provider) {
 		currentProvider = provider;
 	}
 
-	@Override
-	public MapProvider getMapProvider() {
+	public ClassMapper getMapProvider() {
 		return currentProvider;
 	}
 
-	@Override
-	public <T extends DoMap> void setTransferProvider(T provider) {
+	public <T extends DataTransfer> void setTransferProvider(T provider) {
 		transferProvider = provider;
 	}
 
-	@Override
-	public DoMap getTransferProvider() {
+	public DataTransfer getTransferProvider() {
 		return transferProvider;
 	}
 

@@ -58,4 +58,9 @@ public abstract class MapItem{
 	
 	abstract public void addFields(MapItem fields);
 	
+	public boolean isEmpty(){
+		return sourceClass == null;
+	}
+	
+	abstract public boolean isMappedClass();
 }

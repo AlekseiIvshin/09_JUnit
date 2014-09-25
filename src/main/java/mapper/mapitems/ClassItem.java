@@ -1,9 +1,14 @@
 package mapper.mapitems;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class ClassItem extends MapItem{
 
+	public ClassItem(){
+		classFields = new HashSet<MapItem>();
+	}
+	
 	@Override
 	public Set<MapItem> getClassFields() {
 		return this.classFields;
@@ -19,6 +24,11 @@ public class ClassItem extends MapItem{
 		if(!classFields.contains(fields)){
 			classFields.add(fields);
 		}
+	}
+
+	@Override
+	public boolean isMappedClass() {
+		return true;
 	}
 
 

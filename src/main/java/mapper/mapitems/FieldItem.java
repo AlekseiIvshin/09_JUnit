@@ -15,4 +15,9 @@ public class FieldItem extends MapItem{
 
 	@Override
 	public void addFields(MapItem fields) {	}
+
+	@Override
+	public boolean isMappedClass() {
+		return false;
+	}
 }

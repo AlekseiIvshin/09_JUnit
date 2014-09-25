@@ -13,14 +13,14 @@ import annotation.ClassTarget;
 import annotation.FieldName;
 
 public class ClassMapperImpl implements ClassMapper {
-	MapItem map;
+	ClassItem map;
 
-	ClassMapperImpl() {
+	public ClassMapperImpl() {
 		map = new ClassItem();
 	}
 
 	@Override
-	public MapItem getMap() {
+	public ClassItem getMap() {
 		return map;
 	};
 

@@ -1,7 +1,9 @@
 package mapper;
 
 import mapper.datagetter.DoMap;
+import mapper.datatransfer.DataTransfer;
 import mapper.mapclass.MapProvider;
+import mapper.mapping.ClassMapper;
 
 public interface Mapper {
 
@@ -15,9 +17,9 @@ public interface Mapper {
 	
 	public void prepareMap(Class<?> fromObject) throws MapperException;
 	
-	public <T extends MapProvider> void setMapProvider(T provider);
-	public  MapProvider getMapProvider();
+	public <T extends ClassMapper> void setMapProvider(T provider);
+	public  ClassMapper getMapProvider();
 	
-	public <T extends DoMap> void setTransferProvider(T provider);
-	public DoMap getTransferProvider();
+	public <T extends DataTransfer> void setTransferProvider(T provider);
+	public DataTransfer getTransferProvider();
 }
