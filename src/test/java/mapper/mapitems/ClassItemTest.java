@@ -1,6 +1,5 @@
 package mapper.mapitems;
 
-import static org.junit.Assert.*;
 import mapper.mapping.MappingException;
 
 import org.junit.Rule;

@@ -27,22 +27,27 @@ public class ClassMapperImpl implements ClassMapper {
 
 	@Override
 	public void createMap(Class<?> sourceClass) throws MappingException {
-		if(sourceClass == null){
+		if (sourceClass == null) {
 			throw new MappingException("Source class are null");
 		}
-		Class<?> targetClass = getTargetClass(sourceClass);
 
 		if (classContainItself(sourceClass)) {
 			throw new MappingException("Class " + sourceClass.getName()
 					+ " contains itself in fields");
 		}
 
+		Class<?> targetClass = getTargetClass(sourceClass);
+
+		setDataToMap(sourceClass, targetClass);
+	}
+
+	public void setDataToMap(Class<?> sourceClass, Class<?> targetClass) throws MappingException {
 		map.setSourceClass(sourceClass);
 		map.setTargetClass(targetClass);
-		map.setClassFields(getFieldsItems(sourceClass.getDeclaredFields(), targetClass));
+		map.setClassFields(getFieldsItems(sourceClass, targetClass));
 	}
-	
-	public boolean classContainItself(Class<?> anyClass){
+
+	public boolean classContainItself(Class<?> anyClass) {
 		Field[] toClassFields = anyClass.getDeclaredFields();
 		for (Field tf : toClassFields) {
 			if (tf.getType().equals(anyClass)) {
@@ -51,67 +56,7 @@ public class ClassMapperImpl implements ClassMapper {
 		}
 		return false;
 	}
-	
-	private Set<MapItem> getFieldsItems(Field[] fields, Class<?> targetClass) throws MappingException{
-		Set<MapItem> fieldItems = new HashSet<MapItem>();
-		for (Field sourceField : fields) {
 
-			if (!isMapped(sourceField)) {
-				continue;
-			}
-
-			Field targetField = getTargetField(targetClass, sourceField);
-
-			boolean fieldClassIsMapped = isMapped(sourceField.getType());
-
-			Method getter = getGetterMethod(sourceField.getName());
-			if (getter == null) {
-				if (!Modifier.isPublic(sourceField.getModifiers())) {
-					throw new MappingException("Field SOURCE_CLASS." + sourceField.getName()
-							+ " value is not avaible for get");
-				}
-			}
-
-			Method setter = getSetterMethod(targetField.getName());
-			if (setter == null) {
-				if (!Modifier.isPublic(targetField.getModifiers())) {
-					throw new MappingException("Field TARGET_CLASS." + targetField.getName()
-							+ " value is not avaible for set");
-				}
-			}
-
-			MapItem item = null;
-
-			if (!fieldClassIsMapped) {
-				if (!sourceField.getType().equals(targetField.getType())) {
-					throw new MappingException(
-							"Types of fields mapped not equals: SOURCE_CLASS."
-									+ sourceField.getName() + " -> TARGET_CLASS."
-									+ targetField.getName());
-				}
-				item = new FieldItem();
-				item.setSourceClass(sourceField.getType());
-				item.setTargetClass(sourceField.getType());
-
-			} else {
-				ClassMapperImpl tmpMapper = new ClassMapperImpl();
-				tmpMapper.createMap(sourceField.getType());
-				item = tmpMapper.getMap();
-			}
-
-			item.setSourceField(sourceField);
-			item.setTargetField(targetField);
-			item.setGetter(getter);
-			item.setSetter(setter);
-			if(!fieldItems.contains(item)){
-				fieldItems.add(item);
-			}
-		}
-		return fieldItems;
-	}
-
-	
-	
 	public static Class<?> getTargetClass(Class<?> sourceClass)
 			throws MappingException {
 		Annotation[] annotations = sourceClass.getAnnotations();
@@ -125,12 +70,8 @@ public class ClassMapperImpl implements ClassMapper {
 				}
 			}
 		}
-		throw new MappingException("Source class not contain annotation @ClassTarget");
-	}
-
-	private static boolean isMapped(Field field) {
-		FieldName fieldName = (FieldName) field.getAnnotation(FieldName.class);
-		return fieldName != null;
+		throw new MappingException(
+				"Source class not contain annotation @ClassTarget");
 	}
 
 	public Field getTargetField(Class<?> targetClass, Field sourceField)
@@ -147,8 +88,75 @@ public class ClassMapperImpl implements ClassMapper {
 				return tf;
 			}
 		}
-		throw new MappingException("Field was in annotation for SOURCE_CLASS." + sourceField.getName()
-				+ " but not found in target class");
+		throw new MappingException("Field was in annotation for SOURCE_CLASS."
+				+ sourceField.getName() + " but not found in target class");
+	}
+
+	public Set<MapItem> getFieldsItems(Class<?> sourceClass, Class<?> targetClass) throws MappingException {
+		Field[] fields = sourceClass.getDeclaredFields();
+		Set<MapItem> fieldItems = new HashSet<MapItem>();
+		for (Field sourceField : fields) {
+
+			if (!isMapped(sourceField)) {
+				continue;
+			}
+
+			Field targetField = getTargetField(targetClass, sourceField);
+
+			boolean fieldClassIsMapped = isMapped(sourceField.getType());
+
+			Method getter = getGetterMethod(sourceField.getName());
+			if (getter == null) {
+				if (!Modifier.isPublic(sourceField.getModifiers())) {
+					throw new MappingException("Field SOURCE_CLASS."
+							+ sourceField.getName()
+							+ " value is not avaible for get");
+				}
+			}
+
+			Method setter = getSetterMethod(targetField.getName());
+			if (setter == null) {
+				if (!Modifier.isPublic(targetField.getModifiers())) {
+					throw new MappingException("Field TARGET_CLASS."
+							+ targetField.getName()
+							+ " value is not avaible for set");
+				}
+			}
+
+			MapItem item = null;
+
+			if (!fieldClassIsMapped) {
+				if (!sourceField.getType().equals(targetField.getType())) {
+					throw new MappingException(
+							"Types of fields mapped not equals: SOURCE_CLASS."
+									+ sourceField.getName()
+									+ " -> TARGET_CLASS."
+									+ targetField.getName());
+				}
+				item = new FieldItem();
+				item.setSourceClass(sourceField.getType());
+				item.setTargetClass(sourceField.getType());
+
+			} else {
+				ClassMapperImpl tmpMapper = new ClassMapperImpl();
+				tmpMapper.createMap(sourceField.getType());
+				item = tmpMapper.getMap();
+			}
+
+			item.setSourceField(sourceField);
+			item.setTargetField(targetField);
+			item.setGetter(getter);
+			item.setSetter(setter);
+			if (!fieldItems.contains(item)) {
+				fieldItems.add(item);
+			}
+		}
+		return fieldItems;
+	}
+
+	private static boolean isMapped(Field field) {
+		FieldName fieldName = (FieldName) field.getAnnotation(FieldName.class);
+		return fieldName != null;
 	}
 
 	private Method getGetterMethod(String fieldName) {
